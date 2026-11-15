@@ -8,21 +8,14 @@
 </head>
 <body>
 
-    <!-- ХЕДЕР: ТОЛЬКО КАРТИНКА-ЛОГОТИП -->
     <header class="hero">
         <div class="hero-banner">
-            <img src="ЛОГОТИП.png"
-                 alt="Yukon Flames logo"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div class="fallback" style="display:none;">
-                <span>[ ЛОГОТИП ]</span>
-            </div>
+            <img src="ЛОГОТИП.png" alt="Yukon Flames logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="fallback" style="display:none;"><span>[ ЛОГОТИП ]</span></div>
         </div>
     </header>
 
-    <!-- СЕТКА ПЕСЕН -->
     <div class="songs-grid">
-
         <!-- 1. АМНЕЗИЯ -->
         <article class="song-card" data-song-id="amnezia" data-title="Амнезия">
             <div class="song-header">
@@ -33,7 +26,6 @@
                 <div class="vocal-note">
                     <p><span>▸</span> Работать над окончаниями.</p>
                 </div>
-                <!-- data-index нужен для скрипта: 1-бек, 2-без инстр, 3-с вокалом -->
                 <div class="audio-block" data-index="1">
                     <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
                     <div class="custom-audio" data-src="бекпартии/Амнезия.aac"></div>
@@ -206,38 +198,36 @@
                 </div>
             </div>
         </article>
-
     </div>
 
-    <!-- ФУТЕР -->
     <footer class="footer">
         <span>YUKON FLAMES · BASS / BACK VOCAL</span>
     </footer>
 
-    <!-- ГЛОБАЛЬНЫЙ ПЛЕЕР (ФИКСИРОВАННЫЙ) -->
+    <!-- НОВЫЙ АДАПТИВНЫЙ ГЛОБАЛЬНЫЙ ПЛЕЕР -->
     <div class="global-player" id="globalPlayer">
-        <div class="gp-info">
-            <div class="gp-title" id="gpTitle">Нажмите Play на любой дорожке</div>
-            <div class="gp-status" id="gpStatus">Ожидание...</div>
+        <div class="gp-container">
+            <div class="gp-info">
+                <div class="gp-title" id="gpTitle">Нажмите Play на любой дорожке</div>
+                <div class="gp-status" id="gpStatus">Ожидание...</div>
+            </div>
+            <div class="gp-controls">
+                <button id="gpNextBtn" class="gp-btn gp-btn-secondary" title="Следующий трек">
+                    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+                <button id="gpPlayBtn" class="gp-btn gp-btn-main">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+            </div>
         </div>
-        <div class="gp-controls">
-            <button id="gpPlayBtn" class="gp-btn">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <button id="gpNextBtn" class="gp-btn gp-btn-secondary" title="Следующий трек">
-                <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-            </button>
-        </div>
-        <div class="gp-progress">
+        <div class="gp-progress-wrap">
             <span id="gpCurrent">0:00</span>
             <input type="range" id="gpSlider" value="0" min="0" max="100" step="0.1">
             <span id="gpDuration">0:00</span>
         </div>
     </div>
 
-    <!-- Скрытый аудиотег для глобального плеера -->
-    <audio id="globalAudio"></audio>
-
+    <audio id="globalAudio" preload="metadata"></audio>
     <script src="script.js"></script>
 </body>
 </html>

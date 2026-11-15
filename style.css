@@ -1,9 +1,5 @@
 /* ===== ОСТРЫЙ ШРИФТ И БАЗА ===== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background-color: #0b0b0b;
@@ -13,7 +9,7 @@ body {
     text-transform: uppercase;
     color: #111;
     line-height: 1.2;
-    padding: 0 1.5rem 120px 1.5rem; /* Отступ снизу под фиксированный плеер */
+    padding: 0 1.5rem 160px 1.5rem; /* Отступ под плеер */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,389 +18,107 @@ body {
 
 /* ===== ХЕДЕР ===== */
 .hero {
-    width: 100%;
-    max-width: 1200px;
-    margin-bottom: 2.5rem;
-    margin-top: 1.5rem;
-    position: relative;
+    width: 100%; max-width: 1200px;
+    margin-bottom: 2.5rem; margin-top: 1.5rem; position: relative;
 }
-
 .hero-banner {
-    width: 100%;
-    height: clamp(180px, 36vw, 360px);
-    background: #1e1e1e;
-    border: 6px solid #eaff00;
+    width: 100%; height: clamp(180px, 36vw, 360px);
+    background: #1e1e1e; border: 6px solid #eaff00;
     box-shadow: 14px 14px 0 #000, 0 0 0 2px #eaff00 inset;
-    overflow: hidden;
-    position: relative;
+    overflow: hidden; position: relative;
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
 }
-
-.hero-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-    filter: contrast(1.15) saturate(0.85);
-}
-
-.hero-banner .fallback {
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(45deg, #0b0b0b 0 20px, #161616 20px 40px), radial-gradient(circle at 70% 30%, rgba(234, 255, 0, 0.18), transparent 60%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-banner .fallback span {
-    color: #eaff00;
-    font-size: clamp(0.8rem, 2.5vw, 1.4rem);
-    letter-spacing: 0.3em;
-    text-shadow: 3px 3px 0 #000;
-    transform: skewX(-6deg);
-    opacity: 0.6;
-}
+.hero-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; filter: contrast(1.15) saturate(0.85); }
+.hero-banner .fallback { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #0b0b0b 0 20px, #161616 20px 40px), radial-gradient(circle at 70% 30%, rgba(234, 255, 0, 0.18), transparent 60%); display: flex; align-items: center; justify-content: center; }
+.hero-banner .fallback span { color: #eaff00; font-size: clamp(0.8rem, 2.5vw, 1.4rem); letter-spacing: 0.3em; text-shadow: 3px 3px 0 #000; transform: skewX(-6deg); opacity: 0.6; }
 
 /* ===== СЕТКА ПЕСЕН ===== */
-.songs-grid {
-    width: 100%;
-    max-width: 1200px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-}
+.songs-grid { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem; }
 
-/* ===== КАРТОЧКА (АККОРДЕОН) ===== */
-.song-card {
-    background: #1e1e1e;
-    border: 4px solid #eaff00;
-    box-shadow: 12px 12px 0 #000, 0 0 0 2px #eaff00 inset;
-    position: relative;
-}
-
-.song-card::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: #eaff00;
-    clip-path: polygon(0 0, 100% 0, 0 100%);
-    border-bottom: 2px solid #000;
-    border-right: 2px solid #000;
-    z-index: 1;
-}
-
-.song-header {
-    padding: 1.5rem 2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-    position: relative;
-    z-index: 2;
-}
-
-.song-title {
-    font-size: clamp(2rem, 7vw, 3.5rem);
-    font-weight: 900;
-    color: #eaff00;
-    text-shadow: 3px 3px 0 #000;
-    letter-spacing: 0.06em;
-    line-height: 1;
-    text-transform: uppercase;
-    transform: skewX(-5deg) scaleY(1.05);
-    word-break: break-word;
-    margin: 0;
-}
-
-.toggle-icon {
-    color: #eaff00;
-    font-size: 2rem;
-    line-height: 1;
-    font-weight: 900;
-    text-shadow: 2px 2px 0 #000;
-    transition: transform 0.3s ease;
-    flex-shrink: 0;
-    margin-left: 1rem;
-}
-
-.song-card.active .toggle-icon {
-    transform: rotate(45deg);
-}
-
-.song-content {
-    display: none;
-    padding: 0 2rem 2rem 2rem;
-    border-top: 2px solid #333;
-}
+/* ===== КАРТОЧКА ===== */
+.song-card { background: #1e1e1e; border: 4px solid #eaff00; box-shadow: 12px 12px 0 #000, 0 0 0 2px #eaff00 inset; position: relative; }
+.song-card::before { content: ''; position: absolute; top: -4px; left: -4px; width: 1.5rem; height: 1.5rem; background: #eaff00; clip-path: polygon(0 0, 100% 0, 0 100%); border-bottom: 2px solid #000; border-right: 2px solid #000; z-index: 1; }
+.song-header { padding: 1.5rem 2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; position: relative; z-index: 2; }
+.song-title { font-size: clamp(2rem, 7vw, 3.5rem); font-weight: 900; color: #eaff00; text-shadow: 3px 3px 0 #000; letter-spacing: 0.06em; line-height: 1; text-transform: uppercase; transform: skewX(-5deg) scaleY(1.05); word-break: break-word; margin: 0; }
+.toggle-icon { color: #eaff00; font-size: 2rem; line-height: 1; font-weight: 900; text-shadow: 2px 2px 0 #000; transition: transform 0.3s ease; flex-shrink: 0; margin-left: 1rem; }
+.song-card.active .toggle-icon { transform: rotate(45deg); }
+.song-content { display: none; padding: 0 2rem 2rem 2rem; border-top: 2px solid #333; }
 
 /* ===== ПОЯСНЕНИЕ ===== */
-.vocal-note {
-    display: inline-block;
-    background: #eaff00;
-    color: #000;
-    font-weight: 900;
-    font-size: 0.95rem;
-    padding: 1rem 1.5rem;
-    letter-spacing: 0.02em;
-    text-transform: none;
-    margin: 1.5rem 0 1rem 0;
-    border: 2px solid #000;
-    box-shadow: 4px 4px 0 #000;
-    transform: skewX(-2deg);
-    max-width: 100%;
-    line-height: 1.5;
-    font-family: 'Arial', sans-serif;
-}
-
+.vocal-note { display: inline-block; background: #eaff00; color: #000; font-weight: 900; font-size: 0.95rem; padding: 1rem 1.5rem; letter-spacing: 0.02em; text-transform: none; margin: 1.5rem 0 1rem 0; border: 2px solid #000; box-shadow: 4px 4px 0 #000; transform: skewX(-2deg); max-width: 100%; line-height: 1.5; font-family: 'Arial', sans-serif; }
 .vocal-note p { margin-bottom: 0.5rem; }
 .vocal-note p:last-child { margin-bottom: 0; }
 
 /* ===== БЛОКИ АУДИО ===== */
-.audio-block {
-    background: #2b2b2b;
-    border-left: 8px solid #eaff00;
-    padding: 1rem 1.2rem 1rem 1.2rem;
-    margin-top: 1rem;
-    box-shadow: inset 0 0 0 1px #3a3a3a, 6px 6px 0 #000;
-}
+.audio-block { background: #2b2b2b; border-left: 8px solid #eaff00; padding: 1rem 1.2rem 1rem 1.2rem; margin-top: 1rem; box-shadow: inset 0 0 0 1px #3a3a3a, 6px 6px 0 #000; }
+.audio-label { display: flex; align-items: center; gap: 0.5rem; color: #eaff00; font-size: 0.85rem; font-weight: 900; letter-spacing: 0.15em; margin-bottom: 0.8rem; text-transform: uppercase; }
+.audio-label .icon { font-size: 1.2rem; line-height: 1; filter: drop-shadow(0 0 2px #eaff00); color: #eaff00; }
 
-.audio-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #eaff00;
-    font-size: 0.85rem;
-    font-weight: 900;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.8rem;
-    text-transform: uppercase;
-}
-
-.audio-label .icon {
-    font-size: 1.2rem;
-    line-height: 1;
-    filter: drop-shadow(0 0 2px #eaff00);
-    color: #eaff00;
-}
-
-/* ===== КАСТОМНЫЙ АУДИО-ПЛЕЕР (В КАРТОЧКАХ) ===== */
-.custom-audio {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: #111;
-    border: 2px solid #333;
-    padding: 0.5rem 1rem;
-    width: 100%;
-}
-
-.custom-audio button {
-    background: #eaff00;
-    border: 2px solid #000;
-    color: #000;
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: transform 0.1s;
-}
-
+/* ===== МИНИ-ПЛЕЕРЫ В КАРТОЧКАХ ===== */
+.custom-audio { display: flex; align-items: center; gap: 1rem; background: #111; border: 2px solid #333; padding: 0.5rem 1rem; width: 100%; }
+.custom-audio button { background: #eaff00; border: 2px solid #000; color: #000; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; }
 .custom-audio button:hover { transform: scale(1.05); }
 .custom-audio button:active { transform: scale(0.95); }
 .custom-audio button svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
+.custom-audio .progress-container { flex: 1; display: flex; align-items: center; gap: 0.8rem; }
+.custom-audio .time-display { color: #eaff00; font-size: 0.75rem; font-weight: 700; min-width: 35px; text-align: center; letter-spacing: 0.05em; }
 
-.custom-audio .progress-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.custom-audio .time-display {
-    color: #eaff00;
-    font-size: 0.75rem;
-    font-weight: 700;
-    min-width: 35px;
-    text-align: center;
-    letter-spacing: 0.05em;
-}
-
-/* Стилизация ползунка */
-input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    background: transparent;
-    cursor: pointer;
-}
-
+/* Стилизация ползунков */
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
 input[type=range]:focus { outline: none; }
-
-input[type=range]::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 6px;
-    background: #333;
-    border: 1px solid #000;
-}
-
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 16px;
-    width: 8px;
-    background: #eaff00;
-    border: 1px solid #000;
-    margin-top: -6px;
-    border-radius: 0; 
-}
-
-input[type=range]::-moz-range-track {
-    width: 100%;
-    height: 6px;
-    background: #333;
-    border: 1px solid #000;
-}
-
-input[type=range]::-moz-range-thumb {
-    height: 16px;
-    width: 8px;
-    background: #eaff00;
-    border: 1px solid #000;
-    border-radius: 0;
-}
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #333; border: 1px solid #000; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 8px; background: #eaff00; border: 1px solid #000; margin-top: -6px; border-radius: 0; }
+input[type=range]::-moz-range-track { width: 100%; height: 6px; background: #333; border: 1px solid #000; }
+input[type=range]::-moz-range-thumb { height: 16px; width: 8px; background: #eaff00; border: 1px solid #000; border-radius: 0; }
 
 /* ===== ФУТЕР ===== */
-.footer {
-    width: 100%;
-    max-width: 1200px;
-    border-top: 4px solid #eaff00;
-    padding-top: 1.2rem;
-    margin-top: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #eaff00;
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 400;
-}
+.footer { width: 100%; max-width: 1200px; border-top: 4px solid #eaff00; padding-top: 1.2rem; margin-top: auto; display: flex; justify-content: center; align-items: center; color: #eaff00; font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 400; }
 
-/* ===== ГЛОБАЛЬНЫЙ ПЛЕЕР ===== */
+/* ===== НОВЫЙ ГЛОБАЛЬНЫЙ ПЛЕЕР ===== */
 .global-player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #1a1a1a;
-    border-top: 4px solid #eaff00;
-    display: flex;
-    align-items: center;
-    padding: 1rem 2rem;
-    gap: 2rem;
-    z-index: 1000;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
-    flex-wrap: wrap;
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #1a1a1a; border-top: 4px solid #eaff00;
+    z-index: 1000; box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column;
+    /* Safe area для iPhone */
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
-.gp-info {
-    flex: 1 1 200px;
-    min-width: 150px;
+.gp-container {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.8rem 1.5rem; gap: 1rem;
 }
 
-.gp-title {
-    color: #eaff00;
-    font-size: 1.1rem;
-    font-weight: 900;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+.gp-info { flex: 1; min-width: 0; /* Чтобы обрезался текст */ }
+.gp-title { color: #eaff00; font-size: 1rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gp-status { color: #888; font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 0.2rem; text-transform: uppercase; }
 
-.gp-status {
-    color: #888;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    margin-top: 0.2rem;
-    text-transform: uppercase;
-}
-
-.gp-controls {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.gp-btn {
-    background: #eaff00;
-    border: 2px solid #000;
-    color: #000;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: transform 0.1s;
-}
-
+.gp-controls { display: flex; gap: 0.8rem; align-items: center; }
+.gp-btn { background: #eaff00; border: 2px solid #000; color: #000; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; }
 .gp-btn:hover { transform: scale(1.05); }
-.gp-btn svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
+.gp-btn svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
+.gp-btn-secondary { background: #333; color: #eaff00; border-color: #eaff00; }
 
-.gp-btn-secondary {
-    background: #333;
-    color: #eaff00;
-    border-color: #eaff00;
-}
-.gp-btn-secondary:hover { background: #444; }
+.gp-progress-wrap { display: flex; align-items: center; gap: 1rem; padding: 0 1.5rem 0.8rem 1.5rem; }
+.gp-progress-wrap span { color: #eaff00; font-size: 0.75rem; font-weight: 700; min-width: 40px; text-align: center; }
 
-.gp-progress {
-    flex: 2 1 300px;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.gp-progress span {
-    color: #eaff00;
-    font-size: 0.8rem;
-    font-weight: 700;
-    min-width: 40px;
-    text-align: center;
-}
-
-/* ===== АДАПТИВ ===== */
-@media (max-width: 800px) {
-    .global-player {
-        padding: 0.8rem 1rem;
-        gap: 1rem;
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .gp-controls {
-        justify-content: center;
-        order: -1; /* Кнопки сверху */
-    }
-    .gp-info { text-align: center; }
-    .gp-progress { width: 100%; }
-}
-
+/* ===== АДАПТИВ ПЛЕЕРА ДЛЯ ТЕЛЕФОНА (Экран < 600px) ===== */
 @media (max-width: 600px) {
     body { padding: 0 0.8rem 180px 0.8rem; }
-    .hero-banner { box-shadow: 8px 8px 0 #000; height: clamp(135px, 40vw, 250px); }
+    .hero-banner { box-shadow: 8px 8px 0 #000; height: clamp(120px, 35vw, 200px); }
     .song-card { box-shadow: 8px 8px 0 #000; }
     .song-header { padding: 1rem 1.2rem; }
     .song-content { padding: 0 1.2rem 1.5rem 1.2rem; }
+    
+    /* Плеер перестраивается в колонку */
+    .gp-container { flex-direction: column; padding: 0.8rem 1rem; gap: 0.8rem; }
+    .gp-info { text-align: center; width: 100%; }
+    .gp-controls { width: 100%; justify-content: center; }
+    .gp-btn { width: 3rem; height: 3rem; } /* Кнопки побольше, чтобы удобно нажимать пальцем */
+    .gp-btn svg { width: 1.5rem; height: 1.5rem; }
+    .gp-progress-wrap { padding: 0 1rem 1rem 1rem; gap: 0.5rem; }
+    .gp-progress-wrap span { font-size: 0.65rem; min-width: 30px; }
+    
     .custom-audio { padding: 0.5rem; gap: 0.5rem; }
     .custom-audio .time-display { font-size: 0.65rem; min-width: 30px; }
 }
