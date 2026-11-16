@@ -1,13 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
     
     // ==========================================
-    // 1. СБОРКА ПЛЕЙЛИСТА
+    // 1. СБОРКА ПЛЕЙЛИСТА (БАЗА ДАННЫХ)
     // ==========================================
     const playlist = [];
     const songCards = document.querySelectorAll('.song-card');
+    const songData = {}; 
 
     songCards.forEach(card => {
         const songTitle = card.getAttribute('data-title');
+        const notesEl = card.querySelector('.vocal-note');
+        const notesHtml = notesEl ? notesEl.innerHTML : '<p>Нет заметок.</p>';
+        
+        songData[songTitle] = {
+            notes: notesHtml,
+            tracks: []
+        };
+
         const blocks = card.querySelectorAll('.audio-block');
 
         blocks.forEach(block => {
@@ -15,19 +24,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const audioContainer = block.querySelector('.custom-audio');
             const src = audioContainer.getAttribute('data-src');
             const isEmpty = audioContainer.getAttribute('data-empty') === 'true';
-
-            let typeName = "";
-            if (index === "1") typeName = "Бек-вокал";
-            if (index === "2") typeName = "Без инструментов";
-            if (index === "3") typeName = "С вокалом";
+            
+            // Берем красивый текст из HTML разметки (audio-label)
+            const labelEl = block.querySelector('.audio-label');
+            let typeName = labelEl ? labelEl.innerText.replace('◈ ', '').trim() : "Трек";
 
             if (src && !isEmpty) {
-                playlist.push({
+                const trackObj = {
                     title: songTitle,
                     type: typeName,
                     src: src,
                     globalIndex: playlist.length
-                });
+                };
+                playlist.push(trackObj);
+                songData[songTitle].tracks.push(trackObj);
             }
         });
     });
@@ -36,8 +46,77 @@ document.addEventListener("DOMContentLoaded", () => {
     let isGlobalPlaying = false;
 
     // ==========================================
-    // 2. ЭЛЕМЕНТЫ
+    // 2. ЭЛЕМЕНТЫ ИНТЕРФЕЙСА
     // ==========================================
+    
+    // Создаем оболочку для двух колонок на лету
+    if (!document.querySelector('.app-layout')) {
+        const layout = document.createElement('div');
+        layout.className = 'app-layout';
+        
+        const songsSection = document.createElement('div');
+        songsSection.className = 'songs-section';
+        
+        // Переносим шапку и сетку в левую колонку
+        const topHeader = document.querySelector('.top-header');
+        const songsGrid = document.querySelector('.songs-grid');
+        if(topHeader) songsSection.appendChild(topHeader);
+        if(songsGrid) songsSection.appendChild(songsGrid);
+        
+        // Создаем правую панель
+        const studioPanel = document.createElement('div');
+        studioPanel.className = 'studio-panel';
+        studioPanel.innerHTML = `
+            <div class="studio-cover">
+                <h2 id="studioTitle">YUKON FLAMES</h2>
+                <div id="studioNotes" class="studio-notes">
+                    <p>Выберите песню слева, чтобы увидеть заметки.</p>
+                </div>
+            </div>
+            <div id="studioTracks" class="studio-tracks"></div>
+            <!-- Плеер -->
+            <div class="global-player" id="globalPlayer">
+                <div class="gp-container">
+                    <div class="gp-info">
+                        <div class="gp-title" id="gpTitle">Трек не выбран</div>
+                        <div class="gp-status" id="gpStatus">Ожидание...</div>
+                    </div>
+                    <div class="gp-controls">
+                        <button id="gpNextBtn" class="gp-btn gp-btn-secondary">
+                            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                        <button id="gpPlayBtn" class="gp-btn gp-btn-main">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="gp-progress-wrap">
+                    <span id="gpCurrent">0:00</span>
+                    <input type="range" id="gpSlider" value="0" min="0" max="100" step="0.1">
+                    <span id="gpDuration">0:00</span>
+                </div>
+            </div>
+        `;
+
+        // Переносим глобальный плеер из HTML в правую панель
+        const oldPlayer = document.getElementById('globalPlayer');
+        if (oldPlayer) oldPlayer.remove();
+
+        layout.appendChild(songsSection);
+        layout.appendChild(studioPanel);
+        
+        // Заменяем body на layout
+        document.body.innerHTML = '';
+        document.body.appendChild(layout);
+        
+        // Возвращаем аудио тег на место
+        const audioTag = document.createElement('audio');
+        audioTag.id = 'globalAudio';
+        audioTag.preload = 'metadata';
+        document.body.appendChild(audioTag);
+    }
+
+    // Получаем ссылки на элементы
     const globalAudio = document.getElementById('globalAudio');
     const gpTitle = document.getElementById('gpTitle');
     const gpStatus = document.getElementById('gpStatus');
@@ -46,6 +125,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const gpSlider = document.getElementById('gpSlider');
     const gpCurrent = document.getElementById('gpCurrent');
     const gpDuration = document.getElementById('gpDuration');
+    
+    const studioTitle = document.getElementById('studioTitle');
+    const studioNotes = document.getElementById('studioNotes');
+    const studioTracks = document.getElementById('studioTracks');
 
     const iconPlay = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
     const iconPause = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
@@ -65,73 +148,45 @@ document.addEventListener("DOMContentLoaded", () => {
         const track = playlist[currentTrackIndex];
         gpTitle.textContent = `${track.title} — ${track.type}`;
         gpStatus.textContent = isGlobalPlaying ? "Играет" : "Пауза";
-        
-        // === МЕДИАСЕССИЯ: Обновление метаданных ===
         updateMediaSession(track);
+        updateStudioTrackButtons();
     }
 
     // ==========================================
-    // 4. МЕДИАСЕССИЯ (MEDIA SESSION API)
+    // 4. МЕДИАСЕССИЯ (ДЛЯ МАГНИТОЛЫ)
     // ==========================================
     function updateMediaSession(track) {
         if ('mediaSession' in navigator) {
+            // Логотип убрали, поэтому ставим пустую обложку с цветом
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: track.title,
                 artist: 'Yukon Flames',
                 album: track.type,
-                artwork: [
-                    { src: 'ЛОГОТИП.png', sizes: '512x512', type: 'image/png' }
-                ]
+                artwork: [{ src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" fill="%23111"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23eaff00" font-size="60" font-family="Arial">YF</text></svg>', sizes: '512x512', type: 'image/svg+xml' }]
             });
 
-            // Обработчики кнопок на руле / магнитоле
             navigator.mediaSession.setActionHandler('play', () => {
                 if (globalAudio.paused) {
-                    globalAudio.play();
-                    isGlobalPlaying = true;
-                    gpPlayBtn.innerHTML = iconPause;
-                    gpStatus.textContent = "Играет";
+                    globalAudio.play(); isGlobalPlaying = true;
+                    gpPlayBtn.innerHTML = iconPause; gpStatus.textContent = "Играет";
                 }
             });
-
             navigator.mediaSession.setActionHandler('pause', () => {
                 if (!globalAudio.paused) {
-                    globalAudio.pause();
-                    isGlobalPlaying = false;
-                    gpPlayBtn.innerHTML = iconPlay;
-                    gpStatus.textContent = "Пауза";
+                    globalAudio.pause(); isGlobalPlaying = false;
+                    gpPlayBtn.innerHTML = iconPlay; gpStatus.textContent = "Пауза";
                 }
             });
-
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                playTrack(currentTrackIndex - 1);
-            });
-
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                playTrack(currentTrackIndex + 1);
-            });
-
-            // Обработка перемотки (если поддерживается)
-            try {
-                navigator.mediaSession.setActionHandler('seekbackward', () => {
-                    globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 10);
-                });
-                navigator.mediaSession.setActionHandler('seekforward', () => {
-                    globalAudio.currentTime = Math.min(globalAudio.duration, globalAudio.currentTime + 10);
-                });
-            } catch (error) {
-                // Некоторые браузеры не поддерживают перемотку
-            }
+            navigator.mediaSession.setActionHandler('previoustrack', () => playTrack(currentTrackIndex - 1));
+            navigator.mediaSession.setActionHandler('nexttrack', () => playTrack(currentTrackIndex + 1));
         }
     }
 
     // ==========================================
-    // 5. ЗАПУСК ТРЕКА
+    // 5. ЗАПУСК И УПРАВЛЕНИЕ
     // ==========================================
     function playTrack(index) {
         if (playlist.length === 0) return;
-        
-        // Бесконечный цикл
         if (index >= playlist.length) index = 0;
         if (index < 0) index = playlist.length - 1;
         
@@ -145,10 +200,9 @@ document.addEventListener("DOMContentLoaded", () => {
             playPromise.then(() => {
                 isGlobalPlaying = true;
                 gpPlayBtn.innerHTML = iconPause;
-                updateGlobalUI(); // Здесь же обновляется и медиасессия
-                highlightActiveCard(track.title);
+                updateGlobalUI();
+                highlightActiveSong(track.title);
             }).catch(error => {
-                console.log("Автовоспроизведение заблокировано:", error);
                 isGlobalPlaying = false;
                 gpPlayBtn.innerHTML = iconPlay;
                 gpStatus.textContent = "Нажмите Play";
@@ -156,54 +210,97 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function highlightActiveCard(songTitle) {
+    // Подсветка песни и обновление правой панели
+    function highlightActiveSong(songTitle) {
         songCards.forEach(card => {
             if (card.getAttribute('data-title') === songTitle) {
-                if (!card.classList.contains('active')) {
-                    card.querySelector('.song-header').click();
-                }
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
             }
+        });
+        
+        const data = songData[songTitle];
+        if (data) {
+            studioTitle.textContent = songTitle;
+            studioNotes.innerHTML = data.notes;
+            renderStudioTracks(data.tracks);
+        }
+    }
+
+    // Отрисовка списка треков в правой панели
+    function renderStudioTracks(tracks) {
+        studioTracks.innerHTML = '';
+        tracks.forEach(track => {
+            const btn = document.createElement('button');
+            btn.className = 'track-btn';
+            
+            const isCurrent = playlist[currentTrackIndex] && playlist[currentTrackIndex].src === track.src;
+
+            if (isCurrent && isGlobalPlaying) {
+                btn.classList.add('playing');
+            }
+
+            btn.innerHTML = `
+                <span>${track.type}</span>
+                <svg class="track-icon" viewBox="0 0 24 24">${isCurrent && isGlobalPlaying ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>' : '<path d="M8 5v14l11-7z"/>'}</svg>
+            `;
+
+            btn.addEventListener('click', () => {
+                if (isCurrent && isGlobalPlaying) {
+                    globalAudio.pause();
+                    isGlobalPlaying = false;
+                    gpPlayBtn.innerHTML = iconPlay;
+                    gpStatus.textContent = "Пауза";
+                    updateStudioTrackButtons();
+                } else {
+                    playTrack(track.globalIndex);
+                }
+            });
+
+            studioTracks.appendChild(btn);
         });
     }
 
+    function updateStudioTrackButtons() {
+        if (!playlist[currentTrackIndex]) return;
+        const activeSong = playlist[currentTrackIndex].title;
+        if (songData[activeSong]) {
+            // Перерисовываем только если открыта та же песня
+            const currentStudioTitle = studioTitle.textContent;
+            if (activeSong === currentStudioTitle) {
+                renderStudioTracks(songData[activeSong].tracks);
+            }
+        }
+    }
+
     // ==========================================
-    // 6. ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ
+    // 6. ОБРАБОТЧИКИ
     // ==========================================
     
     gpPlayBtn.addEventListener('click', () => {
-        if (playlist.length === 0) return;
-        
         if (globalAudio.paused) {
-            if (!globalAudio.src) {
-                playTrack(0);
-            } else {
-                globalAudio.play();
-                isGlobalPlaying = true;
-                gpPlayBtn.innerHTML = iconPause;
-                gpStatus.textContent = "Играет";
+            if (!globalAudio.src) playTrack(0);
+            else {
+                globalAudio.play(); isGlobalPlaying = true;
+                gpPlayBtn.innerHTML = iconPause; gpStatus.textContent = "Играет";
+                updateStudioTrackButtons();
             }
         } else {
-            globalAudio.pause();
-            isGlobalPlaying = false;
-            gpPlayBtn.innerHTML = iconPlay;
-            gpStatus.textContent = "Пауза";
+            globalAudio.pause(); isGlobalPlaying = false;
+            gpPlayBtn.innerHTML = iconPlay; gpStatus.textContent = "Пауза";
+            updateStudioTrackButtons();
         }
     });
 
-    gpNextBtn.addEventListener('click', () => {
-        playTrack(currentTrackIndex + 1);
-    });
+    gpNextBtn.addEventListener('click', () => playTrack(currentTrackIndex + 1));
 
     globalAudio.addEventListener('ended', () => {
-        setTimeout(() => {
-            playTrack(currentTrackIndex + 1);
-        }, 100);
+        setTimeout(() => playTrack(currentTrackIndex + 1), 100);
     });
 
     globalAudio.addEventListener('timeupdate', () => {
-        if (!gpSlider.matches(':active')) {
-            gpSlider.value = globalAudio.currentTime;
-        }
+        if (!gpSlider.matches(':active')) gpSlider.value = globalAudio.currentTime;
         gpCurrent.textContent = formatTime(globalAudio.currentTime);
     });
 
@@ -220,111 +317,27 @@ document.addEventListener("DOMContentLoaded", () => {
         globalAudio.currentTime = gpSlider.value;
     });
 
-    // ==========================================
-    // 7. АККОРДЕОН И МИНИ-ПЛЕЕРЫ
-    // ==========================================
+    // Клик по песне в левой колонке
     songCards.forEach(card => {
         const header = card.querySelector('.song-header');
-        const content = card.querySelector('.song-content');
-        
         header.addEventListener('click', () => {
-            const isActive = card.classList.contains('active');
-            songCards.forEach(c => {
-                c.classList.remove('active');
-                c.querySelector('.song-content').style.display = 'none';
-            });
-            if (!isActive) {
-                card.classList.add('active');
-                content.style.display = 'block';
-            }
-        });
-    });
-
-    const players = document.querySelectorAll('.custom-audio');
-    
-    players.forEach(container => {
-        const src = container.getAttribute('data-src');
-        const isEmpty = container.getAttribute('data-empty') === 'true';
-
-        if (isEmpty || !src) {
-            container.innerHTML = `<span style="color:#666; font-size: 0.8rem; letter-spacing: 0.1em;">[ АУДИО НЕДОСТУПНО ]</span>`;
-            container.style.justifyContent = "center";
-            return;
-        }
-
-        const globalTrack = playlist.find(t => t.src === src);
-
-        container.innerHTML = `
-            <button class="play-btn" aria-label="Play">${iconPlay}</button>
-            <div class="progress-container">
-                <span class="time-display current-time">0:00</span>
-                <input type="range" class="seek-slider" value="0" min="0" max="100" step="0.1">
-                <span class="time-display duration">0:00</span>
-            </div>
-            <audio src="${src}" preload="metadata"></audio>
-        `;
-
-        const playBtn = container.querySelector('.play-btn');
-        const slider = container.querySelector('.seek-slider');
-        const currentTimeEl = container.querySelector('.current-time');
-        const durationEl = container.querySelector('.duration');
-
-        playBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); 
+            const songTitle = card.getAttribute('data-title');
             
-            if (globalTrack) {
-                if (currentTrackIndex === globalTrack.globalIndex && isGlobalPlaying) {
-                    globalAudio.pause();
-                    isGlobalPlaying = false;
-                    gpPlayBtn.innerHTML = iconPlay;
-                    gpStatus.textContent = "Пауза";
-                } else {
-                    playTrack(globalTrack.globalIndex);
-                }
-            }
-        });
-
-        globalAudio.addEventListener('play', () => {
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].src === src) {
-                playBtn.innerHTML = iconPause;
+            // Если песня уже выбрана и играет — пауза
+            if (card.classList.contains('active') && isGlobalPlaying && playlist[currentTrackIndex].title === songTitle) {
+                globalAudio.pause(); isGlobalPlaying = false;
+                gpPlayBtn.innerHTML = iconPlay; gpStatus.textContent = "Пауза";
+                updateStudioTrackButtons();
             } else {
-                playBtn.innerHTML = iconPlay;
-            }
-        });
-        
-        globalAudio.addEventListener('pause', () => {
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].src === src) {
-                playBtn.innerHTML = iconPlay;
-            }
-        });
-
-        globalAudio.addEventListener('timeupdate', () => {
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].src === src) {
-                if (!slider.matches(':active')) {
-                    slider.value = globalAudio.currentTime;
-                }
-                currentTimeEl.textContent = formatTime(globalAudio.currentTime);
-            }
-        });
-
-        globalAudio.addEventListener('loadedmetadata', () => {
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].src === src) {
-                durationEl.textContent = formatTime(globalAudio.duration);
-                slider.max = globalAudio.duration;
-            }
-        });
-
-        slider.addEventListener('input', () => {
-            currentTimeEl.textContent = formatTime(slider.value);
-        });
-
-        slider.addEventListener('change', () => {
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].src === src) {
-                globalAudio.currentTime = slider.value;
+                // Иначе просто подсвечиваем и показываем треки
+                highlightActiveSong(songTitle);
             }
         });
     });
 
-    // Инициализация при старте
-    updateGlobalUI();
+    // Инициализация при загрузке
+    if (playlist.length > 0) {
+        // Автоматически выбираем первую песню для отображения
+        highlightActiveSong(playlist[0].title);
+    }
 });

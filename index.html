@@ -8,14 +8,15 @@
 </head>
 <body>
 
-    <header class="hero">
-        <div class="hero-banner">
-            <img src="ЛОГОТИП.png" alt="Yukon Flames logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div class="fallback" style="display:none;"><span>[ ЛОГОТИП ]</span></div>
-        </div>
+    <!-- КОМПАКТНАЯ ШАПКА -->
+    <header class="top-header">
+        <h1>YUKON FLAMES</h1>
+        <span>BACK VOCAL / BASS</span>
     </header>
 
+    <!-- СЕТКА КАРТОЧЕК -->
     <div class="songs-grid">
+        
         <!-- 1. АМНЕЗИЯ -->
         <article class="song-card" data-song-id="amnezia" data-title="Амнезия">
             <div class="song-header">
@@ -31,11 +32,11 @@
                     <div class="custom-audio" data-src="бекпартии/Амнезия.aac"></div>
                 </div>
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
+                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
                     <div class="custom-audio" data-src="инструментал/Yukon Flames - Амнезия[rebalanced].mp3"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Амнезия.mp3"></div>
                 </div>
             </div>
@@ -58,17 +59,17 @@
                     <div class="custom-audio" data-src="бекпартии/Мегаполис.aac"></div>
                 </div>
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
+                    <div class="audio-label"><span class="icon">◈</span> Без инструментов</div>
                     <div class="custom-audio" data-src="инструментал/Yukon Flames - Мегаполис[rebalanced].mp3"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Мегаполис.mp3"></div>
                 </div>
             </div>
         </article>
 
-        <!-- 3. ЗАЧЕМ -->
+               <!-- 3. ЗАЧЕМ -->
         <article class="song-card" data-song-id="zachem" data-title="Зачем">
             <div class="song-header">
                 <h2 class="song-title">Зачем</h2>
@@ -80,16 +81,34 @@
                     <p><span>▸</span> "Уууээээоооо" — нужно увереннее.</p>
                     <p><span>▸</span> Остальная часть песни не разобрана.</p>
                 </div>
+                
+                <!-- Общий бек-вокал -->
                 <div class="audio-block" data-index="1">
                     <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
                     <div class="custom-audio" data-src="бекпартии/Зачем.aac"></div>
                 </div>
+
+                <!-- НОВЫЕ ПАРТИИ -->
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Зачем[rebalanced].mp3"></div>
+                    <div class="audio-label"><span class="icon">◈</span> Делать, верить</div>
+                    <!-- ВАЖНО: Замените путь на реальное имя файла -->
+                    <div class="custom-audio" data-src="бекпартии/Зачем - делать верить.aac"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> Аэо Гизара</div>
+                    <!-- ВАЖНО: Замените путь на реальное имя файла -->
+                    <div class="custom-audio" data-src="бекпартии/Зачем - Аэо Гизара.mp3"></div>
+                </div>
+
+                <!-- Инструментал -->
+                <div class="audio-block" data-index="4">
+                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
+                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Зачем[rebalanced].mp3"></div>
+                </div>
+
+                <!-- Полноценная песня -->
+                <div class="audio-block" data-index="5">
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Зачем_.mp3"></div>
                 </div>
             </div>
@@ -112,11 +131,11 @@
                     <div class="custom-audio" data-src="бекпартии/Про нас.aac"></div>
                 </div>
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
+                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
                     <div class="custom-audio" data-src="инструментал/Yukon Flames - Про Нас[rebalanced].mp3"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Про Нас.mp3"></div>
                 </div>
             </div>
@@ -137,11 +156,11 @@
                     <div class="custom-audio" data-src="" data-empty="true"></div>
                 </div>
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
+                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
                     <div class="custom-audio" data-src="инструментал/Yukon Flames - Отпуск[rebalanced].mp3"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Отпуск.mp3"></div>
                 </div>
             </div>
@@ -162,11 +181,11 @@
                     <div class="custom-audio" data-src="бекпартии/Меня больше нет.aac"></div>
                 </div>
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
+                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
                     <div class="custom-audio" data-src="инструментал/Yukon Flames - Меня больше нет[rebalanced].mp3"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Меня больше нет.mp3"></div>
                 </div>
             </div>
@@ -189,30 +208,27 @@
                     <div class="custom-audio" data-src="" data-empty="true"></div>
                 </div>
                 <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Песня без инструментов</div>
+                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
                     <div class="custom-audio" data-src="инструментал/Yukon Flames - Песня Про Ленивого Студента[rebalanced].mp3"></div>
                 </div>
                 <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Песня с вокалом</div>
+                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
                     <div class="custom-audio" data-src="полноценные/Yukon Flames - Песня Про Ленивого Студента.mp3"></div>
                 </div>
             </div>
         </article>
+
     </div>
 
-    <footer class="footer">
-        <span>YUKON FLAMES · BASS / BACK VOCAL</span>
-    </footer>
-
-    <!-- НОВЫЙ АДАПТИВНЫЙ ГЛОБАЛЬНЫЙ ПЛЕЕР -->
+    <!-- ГЛОБАЛЬНЫЙ ПЛЕЕР -->
     <div class="global-player" id="globalPlayer">
         <div class="gp-container">
             <div class="gp-info">
-                <div class="gp-title" id="gpTitle">Нажмите Play на любой дорожке</div>
+                <div class="gp-title" id="gpTitle">Выберите трек</div>
                 <div class="gp-status" id="gpStatus">Ожидание...</div>
             </div>
             <div class="gp-controls">
-                <button id="gpNextBtn" class="gp-btn gp-btn-secondary" title="Следующий трек">
+                <button id="gpNextBtn" class="gp-btn gp-btn-secondary">
                     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </button>
                 <button id="gpPlayBtn" class="gp-btn gp-btn-main">
