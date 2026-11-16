@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (index === "2") typeName = "Без инструментов";
             if (index === "3") typeName = "С вокалом";
 
-            // Добавляем в плейлист только существующие файлы
             if (src && !isEmpty) {
                 playlist.push({
                     title: songTitle,
@@ -66,32 +65,90 @@ document.addEventListener("DOMContentLoaded", () => {
         const track = playlist[currentTrackIndex];
         gpTitle.textContent = `${track.title} — ${track.type}`;
         gpStatus.textContent = isGlobalPlaying ? "Играет" : "Пауза";
+        
+        // === МЕДИАСЕССИЯ: Обновление метаданных ===
+        updateMediaSession(track);
     }
 
-    // Запуск трека (с принудительным вызовом play)
+    // ==========================================
+    // 4. МЕДИАСЕССИЯ (MEDIA SESSION API)
+    // ==========================================
+    function updateMediaSession(track) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.title,
+                artist: 'Yukon Flames',
+                album: track.type,
+                artwork: [
+                    { src: 'ЛОГОТИП.png', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+
+            // Обработчики кнопок на руле / магнитоле
+            navigator.mediaSession.setActionHandler('play', () => {
+                if (globalAudio.paused) {
+                    globalAudio.play();
+                    isGlobalPlaying = true;
+                    gpPlayBtn.innerHTML = iconPause;
+                    gpStatus.textContent = "Играет";
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('pause', () => {
+                if (!globalAudio.paused) {
+                    globalAudio.pause();
+                    isGlobalPlaying = false;
+                    gpPlayBtn.innerHTML = iconPlay;
+                    gpStatus.textContent = "Пауза";
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                playTrack(currentTrackIndex - 1);
+            });
+
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                playTrack(currentTrackIndex + 1);
+            });
+
+            // Обработка перемотки (если поддерживается)
+            try {
+                navigator.mediaSession.setActionHandler('seekbackward', () => {
+                    globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 10);
+                });
+                navigator.mediaSession.setActionHandler('seekforward', () => {
+                    globalAudio.currentTime = Math.min(globalAudio.duration, globalAudio.currentTime + 10);
+                });
+            } catch (error) {
+                // Некоторые браузеры не поддерживают перемотку
+            }
+        }
+    }
+
+    // ==========================================
+    // 5. ЗАПУСК ТРЕКА
+    // ==========================================
     function playTrack(index) {
         if (playlist.length === 0) return;
         
-        // Бесконечный цикл: если дошли до конца, начинаем с начала
+        // Бесконечный цикл
         if (index >= playlist.length) index = 0;
         if (index < 0) index = playlist.length - 1;
         
         currentTrackIndex = index;
         const track = playlist[currentTrackIndex];
 
-        // Ставим новый src и запускаем
         globalAudio.src = track.src;
         
-        // Обработка Promise (важно для мобильных браузеров)
         const playPromise = globalAudio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 isGlobalPlaying = true;
                 gpPlayBtn.innerHTML = iconPause;
-                updateGlobalUI();
+                updateGlobalUI(); // Здесь же обновляется и медиасессия
                 highlightActiveCard(track.title);
             }).catch(error => {
-                console.log("Автовоспроизведение заблокировано браузером:", error);
+                console.log("Автовоспроизведение заблокировано:", error);
                 isGlobalPlaying = false;
                 gpPlayBtn.innerHTML = iconPlay;
                 gpStatus.textContent = "Нажмите Play";
@@ -99,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Подсветка активной карточки
     function highlightActiveCard(songTitle) {
         songCards.forEach(card => {
             if (card.getAttribute('data-title') === songTitle) {
@@ -111,14 +167,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 4. ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ
+    // 6. ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ
     // ==========================================
     
     gpPlayBtn.addEventListener('click', () => {
         if (playlist.length === 0) return;
         
         if (globalAudio.paused) {
-            // Если плеер пустой (первое включение), запускаем нулевой трек
             if (!globalAudio.src) {
                 playTrack(0);
             } else {
@@ -139,15 +194,12 @@ document.addEventListener("DOMContentLoaded", () => {
         playTrack(currentTrackIndex + 1);
     });
 
-    // КРИТИЧЕСКИ ВАЖНО: Автопереход на следующий трек по окончании
     globalAudio.addEventListener('ended', () => {
-        // Небольшая задержка, чтобы мобильные браузеры не глючили
         setTimeout(() => {
             playTrack(currentTrackIndex + 1);
         }, 100);
     });
 
-    // Таймлайн глобального плеера
     globalAudio.addEventListener('timeupdate', () => {
         if (!gpSlider.matches(':active')) {
             gpSlider.value = globalAudio.currentTime;
@@ -169,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ==========================================
-    // 5. АККОРДЕОН И МИНИ-ПЛЕЕРЫ
+    // 7. АККОРДЕОН И МИНИ-ПЛЕЕРЫ
     // ==========================================
     songCards.forEach(card => {
         const header = card.querySelector('.song-header');
@@ -200,7 +252,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Ищем индекс этого трека в глобальном плейлисте
         const globalTrack = playlist.find(t => t.src === src);
 
         container.innerHTML = `
@@ -218,26 +269,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const currentTimeEl = container.querySelector('.current-time');
         const durationEl = container.querySelector('.duration');
 
-        // При клике на мини-плеер — запускаем глобальный
         playBtn.addEventListener('click', (e) => {
             e.stopPropagation(); 
             
             if (globalTrack) {
-                // Если это тот же трек, что играет сейчас
                 if (currentTrackIndex === globalTrack.globalIndex && isGlobalPlaying) {
                     globalAudio.pause();
                     isGlobalPlaying = false;
                     gpPlayBtn.innerHTML = iconPlay;
                     gpStatus.textContent = "Пауза";
                 } else {
-                    // Иначе запускаем его
                     playTrack(globalTrack.globalIndex);
                 }
             }
         });
 
-        // Синхронизация состояния кнопок мини-плеера
-        // Используем ID трека, чтобы не было багов с кодировкой путей
         globalAudio.addEventListener('play', () => {
             if (playlist[currentTrackIndex] && playlist[currentTrackIndex].src === src) {
                 playBtn.innerHTML = iconPause;
@@ -279,5 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Инициализация при старте
     updateGlobalUI();
 });
