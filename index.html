@@ -2,248 +2,446 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YUKON FLAMES · BECK VOCAL</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ===== ОБНУЛЕНИЕ И БАЗА ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #0b0b0b;
+            font-family: 'Arial Narrow', 'Impact', Arial, sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #eaff00;
+            line-height: 1.2;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            display: flex;
+        }
+
+        /* ========================================= */
+        /* ЛЕВАЯ ПАНЕЛЬ (СПИСОК ПЕСЕН) */
+        /* ========================================= */
+        .sidebar {
+            width: 40%;
+            min-width: 300px;
+            max-width: 500px;
+            background: #111;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .top-header {
+            padding: 1.2rem;
+            border-bottom: 4px solid #eaff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-shrink: 0;
+        }
+        .top-header h1 { font-size: 1.4rem; transform: skewX(-5deg); text-shadow: 3px 3px 0 #000; }
+        .top-header span { font-size: 0.7rem; color: #888; }
+
+        .songs-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .song-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-left: 4px solid #333;
+            padding: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .song-item:hover { background: #222; }
+        .song-item.active {
+            border-color: #eaff00;
+            border-left: 4px solid #eaff00;
+            background: #252525;
+        }
+        .song-title { font-size: 1rem; color: #eaff00; }
+        .song-icon { font-size: 1rem; color: #666; }
+        .song-item.active .song-icon { color: #eaff00; }
+
+        /* ========================================= */
+        /* ПРАВАЯ ПАНЕЛЬ */
+        /* ========================================= */
+        .main-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: repeating-linear-gradient(-45deg, #0b0b0b, #0b0b0b 15px, #151515 15px, #151515 30px);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* ПЛЕЕР СВЕРХУ */
+        .player-bar {
+            background: #000;
+            border-bottom: 2px solid #eaff00;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-text { color: #fff; font-size: 0.9rem; font-weight: 900; }
+        .player-status { color: #eaff00; font-size: 0.7rem; }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .player-btn {
+            background: transparent;
+            border: 2px solid #eaff00;
+            color: #eaff00;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .player-btn-main { background: #eaff00; color: #000; }
+        .player-btn svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
+        .player-btn-secondary { border-color: #444; color: #888; }
+
+        .progress-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .time-text { color: #888; font-size: 0.7rem; min-width: 35px; text-align: center; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 8px; background: #eaff00; margin-top: -4px; }
+
+        /* КОНТЕНТ */
+        .cover-area {
+            flex: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .current-title {
+            font-size: 2rem;
+            color: #eaff00;
+            text-shadow: 3px 3px 0 #000;
+            transform: skewX(-5deg);
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+            word-wrap: break-word;
+        }
+
+        .notes-box {
+            background: rgba(234, 255, 0, 0.95);
+            color: #000;
+            padding: 1rem;
+            font-family: Arial, sans-serif;
+            font-size: 0.9rem;
+            text-transform: none;
+            line-height: 1.4;
+            border-left: 6px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+        .notes-box p { margin-bottom: 0.4rem; }
+
+        .tracks-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .track-btn {
+            background: #111;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 0.6rem 0.8rem;
+            font-family: inherit;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .track-btn:hover { border-color: #eaff00; }
+        .track-btn.playing {
+            background: #eaff00;
+            color: #000;
+            border-color: #eaff00;
+        }
+
+        /* АДАПТИВ */
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: 35vh; border-right: none; border-bottom: 2px solid #333; }
+            .main-panel { height: 65vh; }
+            .cover-area { padding: 1rem; }
+            .current-title { font-size: 1.6rem; margin-bottom: 0.8rem; }
+            .notes-box { font-size: 0.85rem; padding: 0.8rem; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- КОМПАКТНАЯ ШАПКА -->
-    <header class="top-header">
-        <h1>YUKON FLAMES</h1>
-        <span>BACK VOCAL / BASS</span>
-    </header>
-
-    <!-- СЕТКА КАРТОЧЕК -->
-    <div class="songs-grid">
-        
-        <!-- 1. АМНЕЗИЯ -->
-        <article class="song-card" data-song-id="amnezia" data-title="Амнезия">
-            <div class="song-header">
-                <h2 class="song-title">Амнезия</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> Работать над окончаниями.</p>
-                </div>
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="бекпартии/Амнезия.aac"></div>
-                </div>
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Амнезия[rebalanced].mp3"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Амнезия.mp3"></div>
-                </div>
-            </div>
-        </article>
-
-        <!-- 2. МЕГАПОЛИС -->
-        <article class="song-card" data-song-id="megapolis" data-title="Мегаполис">
-            <div class="song-header">
-                <h2 class="song-title">Мегаполис</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> "Стеклаа" — четко.</p>
-                    <p><span>▸</span> "Уеду туда гдеее" — тянешь, мимо нот.</p>
-                    <p><span>▸</span> Попадать в тайминг. Правильно заканчивать слова.</p>
-                </div>
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="бекпартии/Мегаполис.aac"></div>
-                </div>
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Без инструментов</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Мегаполис[rebalanced].mp3"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Мегаполис.mp3"></div>
-                </div>
-            </div>
-        </article>
-
-               <!-- 3. ЗАЧЕМ -->
-        <article class="song-card" data-song-id="zachem" data-title="Зачем">
-            <div class="song-header">
-                <h2 class="song-title">Зачем</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> "делать", "верить" — мимо.</p>
-                    <p><span>▸</span> "Уууээээоооо" — нужно увереннее.</p>
-                    <p><span>▸</span> Остальная часть песни не разобрана.</p>
-                </div>
-                
-                <!-- Общий бек-вокал -->
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="бекпартии/Зачем.aac"></div>
-                </div>
-
-                <!-- НОВЫЕ ПАРТИИ -->
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Делать, верить</div>
-                    <!-- ВАЖНО: Замените путь на реальное имя файла -->
-                    <div class="custom-audio" data-src="бекпартии/Зачем - делать верить.aac"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> Аэо Гизара</div>
-                    <!-- ВАЖНО: Замените путь на реальное имя файла -->
-                    <div class="custom-audio" data-src="бекпартии/Зачем - Аэо Гизара.mp3"></div>
-                </div>
-
-                <!-- Инструментал -->
-                <div class="audio-block" data-index="4">
-                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Зачем[rebalanced].mp3"></div>
-                </div>
-
-                <!-- Полноценная песня -->
-                <div class="audio-block" data-index="5">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Зачем_.mp3"></div>
-                </div>
-            </div>
-        </article>
-
-        <!-- 4. ПРО НАС -->
-        <article class="song-card" data-song-id="pronas" data-title="Про нас">
-            <div class="song-header">
-                <h2 class="song-title">Про нас</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> Припев "у-у-у" — пониже.</p>
-                    <p><span>▸</span> "Уехать с тобой в закат" — мимо, окончание не то.</p>
-                    <p><span>▸</span> В конце "ааааа" — вяло.</p>
-                </div>
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="бекпартии/Про нас.aac"></div>
-                </div>
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Про Нас[rebalanced].mp3"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Про Нас.mp3"></div>
-                </div>
-            </div>
-        </article>
-
-        <!-- 5. ОТПУСК -->
-        <article class="song-card" data-song-id="otpusk" data-title="Отпуск">
-            <div class="song-header">
-                <h2 class="song-title">Отпуск</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> Замечаний нет.</p>
-                </div>
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="" data-empty="true"></div>
-                </div>
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Отпуск[rebalanced].mp3"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Отпуск.mp3"></div>
-                </div>
-            </div>
-        </article>
-
-        <!-- 6. МЕНЯ БОЛЬШЕ НЕТ -->
-        <article class="song-card" data-song-id="menyanet" data-title="Меня больше нет">
-            <div class="song-header">
-                <h2 class="song-title">Меня больше нет</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> Замечаний нет.</p>
-                </div>
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="бекпартии/Меня больше нет.aac"></div>
-                </div>
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Меня больше нет[rebalanced].mp3"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Меня больше нет.mp3"></div>
-                </div>
-            </div>
-        </article>
-
-        <!-- 7. ПРО ЛЕНИВОГО СТУДЕНТА -->
-        <article class="song-card" data-song-id="student" data-title="Про Ленивого Студента">
-            <div class="song-header">
-                <h2 class="song-title">Про Ленивого Студента</h2>
-                <div class="toggle-icon">+</div>
-            </div>
-            <div class="song-content">
-                <div class="vocal-note">
-                    <p><span>▸</span> "шундый" — мимо.</p>
-                    <p><span>▸</span> "Башка бер нэрсэ керми" — лучше.</p>
-                    <p><span>▸</span> "Киреееек" в конце — не тянуть.</p>
-                </div>
-                <div class="audio-block" data-index="1">
-                    <div class="audio-label"><span class="icon">◈</span> Бек-вокал (партия)</div>
-                    <div class="custom-audio" data-src="" data-empty="true"></div>
-                </div>
-                <div class="audio-block" data-index="2">
-                    <div class="audio-label"><span class="icon">◈</span> Без вокала</div>
-                    <div class="custom-audio" data-src="инструментал/Yukon Flames - Песня Про Ленивого Студента[rebalanced].mp3"></div>
-                </div>
-                <div class="audio-block" data-index="3">
-                    <div class="audio-label"><span class="icon">◈</span> С вокалом</div>
-                    <div class="custom-audio" data-src="полноценные/Yukon Flames - Песня Про Ленивого Студента.mp3"></div>
-                </div>
-            </div>
-        </article>
-
+    <div class="sidebar">
+        <div class="top-header">
+            <h1>YUKON FLAMES</h1>
+            <span>BACK VOCAL</span>
+        </div>
+        <div class="songs-list" id="songsList"></div>
     </div>
 
-    <!-- ГЛОБАЛЬНЫЙ ПЛЕЕР -->
-    <div class="global-player" id="globalPlayer">
-        <div class="gp-container">
-            <div class="gp-info">
-                <div class="gp-title" id="gpTitle">Выберите трек</div>
-                <div class="gp-status" id="gpStatus">Ожидание...</div>
+    <div class="main-panel">
+        <!-- ПЛЕЕР НАВЕРХУ -->
+        <div class="player-bar">
+            <div class="player-info">
+                <div class="player-text" id="uiPlayerTitle">Трек не выбран</div>
+                <div class="player-status" id="uiPlayerStatus">Ожидание</div>
             </div>
-            <div class="gp-controls">
-                <button id="gpNextBtn" class="gp-btn gp-btn-secondary">
+            <div class="player-controls">
+                <button class="player-btn player-btn-secondary" id="btnNext">
                     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </button>
-                <button id="gpPlayBtn" class="gp-btn gp-btn-main">
-                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <button class="player-btn player-btn-main" id="btnPlay">
+                    <svg viewBox="0 0 24 24" id="iconPlay"><path d="M8 5v14l11-7z"/></svg>
                 </button>
+                <div class="progress-container">
+                    <span class="time-text" id="uiTimeCurrent">0:00</span>
+                    <input type="range" id="uiSlider" value="0" min="0" max="100" step="0.1">
+                    <span class="time-text" id="uiTimeDuration">0:00</span>
+                </div>
             </div>
         </div>
-        <div class="gp-progress-wrap">
-            <span id="gpCurrent">0:00</span>
-            <input type="range" id="gpSlider" value="0" min="0" max="100" step="0.1">
-            <span id="gpDuration">0:00</span>
+
+        <!-- КОНТЕНТ ПОД ПЛЕЕРОМ -->
+        <div class="cover-area">
+            <h2 class="current-title" id="uiTitle">Выберите песню</h2>
+            <div class="notes-box" id="uiNotes">
+                <p>Нажмите на песню слева.</p>
+            </div>
+            <div class="tracks-list" id="uiTracks"></div>
         </div>
     </div>
 
-    <audio id="globalAudio" preload="metadata"></audio>
-    <script src="script.js"></script>
+    <audio id="mainAudio"></audio>
+
+    <script>
+        // ==========================================
+        // 1. КЕШИРОВАНИЕ (SERVICE WORKER)
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('Кеширование включено. Сайт будет работать офлайн.', reg);
+                }).catch(err => {
+                    console.log('Ошибка кеширования:', err);
+                });
+            });
+        }
+
+        // ==========================================
+        // 2. БАЗА ДАННЫХ
+        // ==========================================
+        const database = [
+            { id: "amnezia", title: "Амнезия", notes: "<p>▸ Работать над окончаниями.</p>", tracks: [
+                { type: "Бек-вокал", src: "бекпартии/Амнезия.mp3" },
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Амнезия[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Амнезия.mp3" } ] },
+            { id: "megapolis", title: "Мегаполис", notes: "<p>▸ Стеклаа — четко.</p><p>▸ Уеду туда гдеее — тянешь, мимо нот.</p><p>▸ Попадать в тайминг.</p>", tracks: [
+                { type: "Бек-вокал", src: "бекпартии/Мегаполис.mp3" },
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Мегаполис[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Мегаполис.mp3" } ] },
+            { id: "zachem", title: "Зачем", notes: "<p>▸ делать, верить — мимо.</p><p>▸ Уууээээоооо — нужно увереннее.</p><p>▸ Остальная часть не разобрана.</p>", tracks: [
+                { type: "Бек-вокал", src: "бекпартии/Зачем.mp3" },
+                { type: "Делать, верить", src: "бекпартии/Зачем - делать верить.mp3" },
+                { type: "Аэо Гизара", src: "бекпартии/Зачем - Аэо Гизара.mp3" },
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Зачем[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Зачем_.mp3" } ] },
+            { id: "pronas", title: "Про нас", notes: "<p>▸ Припев у-у-у — пониже.</p><p>▸ Уехать с тобой в закат — мимо.</p><p>▸ В конце ааааа — вяло.</p>", tracks: [
+                { type: "Бек-вокал", src: "бекпартии/Про нас.mp3" },
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Про Нас[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Про Нас.mp3" } ] },
+            { id: "otpusk", title: "Отпуск", notes: "<p>▸ Замечаний нет.</p>", tracks: [
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Отпуск[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Отпуск.mp3" } ] },
+            { id: "menyanet", title: "Меня больше нет", notes: "<p>▸ Замечаний нет.</p>", tracks: [
+                { type: "Бек-вокал", src: "бекпартии/Меня больше нет.mp3" },
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Меня больше нет[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Меня больше нет.mp3" } ] },
+            { id: "student", title: "Про Ленивого Студента", notes: "<p>▸ шундый — мимо.</p><p>▸ Башка бер нэрсэ керми — лучше.</p><p>▸ Киреееек в конце — не тянуть.</p>", tracks: [
+                { type: "Без вокала", src: "инструментал/Yukon Flames - Песня Про Ленивого Студента[rebalanced].mp3" },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Песня Про Ленивого Студента.mp3" } ] }
+        ];
+
+        // ==========================================
+        // 3. ЛОГИКА ПЛЕЕРА
+        // ==========================================
+        let playlist = [];
+        database.forEach(song => { song.tracks.forEach(track => { playlist.push({ songId: song.id, songTitle: song.title, type: track.type, src: track.src }); }); });
+
+        const songsListEl = document.getElementById('songsList');
+        const uiTitle = document.getElementById('uiTitle');
+        const uiNotes = document.getElementById('uiNotes');
+        const uiTracks = document.getElementById('uiTracks');
+        
+        const mainAudio = document.getElementById('mainAudio');
+        const btnPlay = document.getElementById('btnPlay');
+        const iconPlay = document.getElementById('iconPlay');
+        const btnNext = document.getElementById('btnNext');
+        const uiPlayerTitle = document.getElementById('uiPlayerTitle');
+        const uiPlayerStatus = document.getElementById('uiPlayerStatus');
+        const uiSlider = document.getElementById('uiSlider');
+        const uiTimeCurrent = document.getElementById('uiTimeCurrent');
+        const uiTimeDuration = document.getElementById('uiTimeDuration');
+
+        let currentIndex = -1;
+        let isPlaying = false;
+        let currentSongId = null;
+        const svgPlay = `<path d="M8 5v14l11-7z"/>`;
+        const svgPause = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+
+        function initSongList() {
+            database.forEach(song => {
+                const div = document.createElement('div');
+                div.className = 'song-item';
+                div.dataset.id = song.id;
+                div.innerHTML = `<span class="song-title">${song.title}</span><span class="song-icon">▶</span>`;
+                div.onclick = () => selectSong(song.id);
+                songsListEl.appendChild(div);
+            });
+        }
+
+        function selectSong(songId) {
+            const song = database.find(s => s.id === songId);
+            if (!song) return;
+            currentSongId = songId;
+
+            document.querySelectorAll('.song-item').forEach(el => { el.classList.toggle('active', el.dataset.id === songId); });
+
+            uiTitle.textContent = song.title;
+            uiNotes.innerHTML = song.notes;
+            
+            uiTracks.innerHTML = '';
+            song.tracks.forEach(track => {
+                const globalIdx = playlist.findIndex(p => p.src === track.src);
+                const btn = document.createElement('button');
+                btn.className = 'track-btn';
+                btn.textContent = track.type;
+                if (currentIndex === globalIdx && isPlaying) btn.classList.add('playing');
+                btn.onclick = () => {
+                    if (currentIndex === globalIdx && isPlaying) mainAudio.pause();
+                    else playTrack(globalIdx);
+                };
+                uiTracks.appendChild(btn);
+            });
+
+            const firstTrackGlobalIdx = playlist.findIndex(p => p.songId === songId);
+            if (firstTrackGlobalIdx !== -1) playTrack(firstTrackGlobalIdx);
+        }
+
+        function playTrack(globalIndex) {
+            if (globalIndex < 0 || globalIndex >= playlist.length) return;
+            currentIndex = globalIndex;
+            const track = playlist[currentIndex];
+            mainAudio.src = track.src;
+            mainAudio.play().then(() => { isPlaying = true; updateUI(); }).catch(() => { uiPlayerStatus.textContent = "Ошибка"; isPlaying = false; updateUI(); });
+        }
+
+        function updateUI() {
+            if (currentIndex < 0) return;
+            const track = playlist[currentIndex];
+            uiPlayerTitle.textContent = `${track.songTitle} — ${track.type}`;
+            uiPlayerStatus.textContent = isPlaying ? "Играет" : "Пауза";
+            iconPlay.innerHTML = isPlaying ? svgPause : svgPlay;
+
+            if (currentSongId === track.songId) {
+                const buttons = uiTracks.querySelectorAll('.track-btn');
+                const song = database.find(s => s.id === currentSongId);
+                song.tracks.forEach((t, idx) => {
+                    const globalIdx = playlist.findIndex(p => p.src === t.src);
+                    if (buttons[idx]) buttons[idx].classList.toggle('playing', globalIdx === currentIndex && isPlaying);
+                });
+            }
+        }
+
+        btnPlay.onclick = () => {
+            if (mainAudio.paused) { mainAudio.play(); isPlaying = true; } 
+            else { mainAudio.pause(); isPlaying = false; }
+            updateUI();
+        };
+
+        btnNext.onclick = () => playTrack(currentIndex + 1);
+        mainAudio.onplay = () => { isPlaying = true; updateUI(); };
+        mainAudio.onpause = () => { isPlaying = false; updateUI(); };
+        mainAudio.onended = () => playTrack(currentIndex + 1);
+
+        mainAudio.ontimeupdate = () => {
+            if (!uiSlider.matches(':active')) uiSlider.value = mainAudio.currentTime;
+            uiTimeCurrent.textContent = formatTime(mainAudio.currentTime);
+        };
+
+        mainAudio.onloadedmetadata = () => {
+            uiSlider.max = mainAudio.duration;
+            uiTimeDuration.textContent = formatTime(mainAudio.duration);
+        };
+
+        uiSlider.oninput = () => { uiTimeCurrent.textContent = formatTime(uiSlider.value); };
+        uiSlider.onchange = () => { mainAudio.currentTime = uiSlider.value; };
+
+        function formatTime(sec) {
+            if (isNaN(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        initSongList();
+        if (database.length > 0) {
+            currentSongId = database[0].id;
+            document.querySelector(`.song-item[data-id="${database[0].id}"]`).classList.add('active');
+            uiTitle.textContent = database[0].title;
+            uiNotes.innerHTML = database[0].notes;
+            database[0].tracks.forEach(track => {
+                const btn = document.createElement('button');
+                btn.className = 'track-btn';
+                btn.textContent = track.type;
+                btn.onclick = () => {
+                    const globalIdx = playlist.findIndex(p => p.src === track.src);
+                    playTrack(globalIdx);
+                };
+                uiTracks.appendChild(btn);
+            });
+        }
+    </script>
 </body>
 </html>
