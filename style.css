@@ -1,311 +1,57 @@
-/* ===== БАЗА ===== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
-    background-color: #0b0b0b;
-    font-family: 'Arial Narrow', 'Impact', 'Helvetica Neue', 'Arial', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #eaff00;
-    line-height: 1.2;
-    min-height: 100vh;
-    overflow: hidden; 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 16px;
+  background: #fafafa;
+  color: #222;
 }
 
-/* ===== МАКЕТ (2 КОЛОНКИ) ===== */
-.app-layout {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
+h1 {
+  margin-bottom: 8px;
 }
 
-/* ЛЕВАЯ ЧАСТЬ (СПИСОК) */
-.songs-section {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-    border-right: 2px solid #222;
+#status {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 16px;
 }
 
-.top-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding-bottom: 1.5rem;
-    border-bottom: 4px solid #eaff00;
-    margin-bottom: 1.5rem;
+.track {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fff;
 }
 
-.top-header h1 {
-    font-size: 2rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-shadow: 3px 3px 0 #000;
-    transform: skewX(-5deg);
+.track h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
 }
 
-.top-header span {
-    font-size: 0.8rem;
-    color: #888;
-    letter-spacing: 0.2em;
+.track .notes {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 8px;
 }
 
-.songs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+.track .notes p {
+  margin: 4px 0;
 }
 
-/* КАРТОЧКА В СПИСКЕ */
-.song-card {
-    background: #151515;
-    border: 2px solid #333;
-    border-left: 4px solid #333;
-    transition: all 0.2s;
-    cursor: pointer;
-    position: relative;
+.track .type {
+  font-size: 12px;
+  color: #666;
+  display: block;
+  margin-top: 8px;
 }
 
-.song-card:hover {
-    border-color: #eaff00;
-    background: #1a1a1a;
-}
-
-.song-card.active {
-    border-color: #eaff00;
-    border-left: 6px solid #eaff00;
-    background: #1a1a1a;
-    box-shadow: 0 0 15px rgba(234, 255, 0, 0.1);
-}
-
-.song-header {
-    padding: 1rem 1.2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.song-title {
-    font-size: 1.2rem;
-    font-weight: 900;
-    color: #eaff00;
-    letter-spacing: 0.05em;
-    transform: skewX(-3deg);
-}
-
-.toggle-icon {
-    color: #666;
-    font-size: 1.2rem;
-    font-weight: 900;
-}
-
-.song-card.active .toggle-icon {
-    color: #eaff00;
-}
-
-/* Скрываем лишнее из карточек (переносим всё в правую панель) */
-.song-content {
-    display: none !important; 
-}
-
-/* ========================================= */
-/* ПРАВАЯ ЧАСТЬ (СТУДИЯ / ПЛЕЕР) */
-/* ========================================= */
-.studio-panel {
-    width: 480px;
-    background: #111;
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    position: relative;
-    border-left: 1px solid #333;
-}
-
-/* Блок обложки с пояснениями */
-.studio-cover {
-    width: 100%;
-    /* Увеличили минимальную высоту, чтобы вместить больше текста */
-    min-height: 400px; 
-    border: 3px solid #eaff00;
-    box-shadow: 8px 8px 0 rgba(234, 255, 0, 0.2);
-    margin-bottom: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: 
-        repeating-linear-gradient(
-            -45deg,
-            #0b0b0b,
-            #0b0b0b 15px,
-            #151515 15px,
-            #151515 30px
-        );
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 2rem;
-}
-
-/* Заголовок на обложке */
-.studio-cover h2 {
-    font-size: 2.2rem;
-    color: #eaff00;
-    text-shadow: 4px 4px 0 #000;
-    transform: skewX(-6deg);
-    text-align: center;
-    z-index: 2;
-    margin-bottom: 1.5rem;
-    letter-spacing: 0.1em;
-    flex-shrink: 0;
-}
-
-/* Пояснения прямо на обложке - УВЕЛИЧЕНЫ */
-.studio-notes {
-    background: rgba(234, 255, 0, 0.95);
-    color: #000;
-    font-size: 1rem; /* Шрифт больше */
-    padding: 1.2rem;
-    text-transform: none;
-    font-family: Arial, sans-serif;
-    line-height: 1.5;
-    border-left: 6px solid #000;
-    width: 100%;
-    z-index: 2;
-    box-shadow: 6px 6px 0 #000;
-    /* Позволяем блоку занимать всё оставшееся место */
-    flex-grow: 1; 
-    /* Если текста будет ооочень много, появится скролл */
-    overflow-y: auto; 
-}
-
-.studio-notes p { margin-bottom: 0.6rem; }
-.studio-notes p:last-child { margin-bottom: 0; }
-
-/* Треки (Кнопки) */
-.studio-tracks {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    overflow-y: auto;
-    flex: 1;
-    margin-bottom: 1.5rem;
-    scrollbar-width: none; 
-}
-.studio-tracks::-webkit-scrollbar { display: none; }
-
-.track-btn {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    padding: 0.8rem 1rem;
-    color: #ccc;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    font-family: inherit;
-    text-align: left;
-    font-size: 0.85rem;
-}
-
-.track-btn:hover {
-    background: #222;
-    border-color: #eaff00;
-    color: #eaff00;
-}
-
-.track-btn.playing {
-    background: #eaff00;
-    color: #000;
-    border-color: #eaff00;
-    box-shadow: 0 0 10px rgba(234, 255, 0, 0.3);
-}
-
-.track-btn .track-icon {
-    fill: #888;
-    width: 1rem;
-    height: 1rem;
-}
-
-.track-btn.playing .track-icon {
-    fill: #000;
-}
-
-/* ГЛОБАЛЬНЫЙ ПЛЕЕР (ВНУТРИ ПРАВОЙ ПАНЕЛИ) */
-.global-player {
-    background: #0b0b0b;
-    border: 2px solid #eaff00;
-    padding: 1.2rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    margin-top: auto;
-}
-
-.gp-container { margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;}
-.gp-info { flex: 1; min-width: 0; }
-.gp-title { color: #fff; font-size: 1rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gp-status { color: #eaff00; font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 0.2rem; }
-
-.gp-controls { display: flex; gap: 0.5rem; align-items: center; }
-.gp-btn { background: transparent; border: 2px solid #eaff00; color: #eaff00; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;}
-.gp-btn svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
-.gp-btn-main { background: #eaff00; color: #000; border: none; width: 3rem; height: 3rem; }
-.gp-btn-main svg { width: 1.5rem; height: 1.5rem; }
-.gp-btn-secondary { border-color: #333; color: #888; }
-
-.gp-progress-wrap { display: flex; align-items: center; gap: 1rem; }
-.gp-progress-wrap span { color: #888; font-size: 0.7rem; min-width: 35px; text-align: center; }
-
-/* Стилизация ползунков */
-input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
-input[type=range]:focus { outline: none; }
-input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 8px; background: #eaff00; margin-top: -5px; border-radius: 0; }
-input[type=range]::-moz-range-track { width: 100%; height: 4px; background: #333; }
-input[type=range]::-moz-range-thumb { height: 14px; width: 8px; background: #eaff00; border: none; border-radius: 0; }
-
-/* ===== АДАПТИВ ДЛЯ МОБИЛОК И МАГНИТОЛ ===== */
-@media (max-width: 900px) {
-    body { overflow: auto; }
-    
-    .app-layout {
-        flex-direction: column-reverse; 
-        height: auto;
-    }
-    
-    .songs-section {
-        border-right: none;
-        padding: 1rem;
-    }
-    
-    .studio-panel {
-        width: 100%;
-        padding: 1.5rem;
-        border-top: 4px solid #eaff00;
-        border-left: none;
-    }
-    
-    .studio-cover {
-        min-height: auto; 
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .studio-cover h2 {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-    }
-    
-    .studio-notes {
-        font-size: 0.95rem;
-        padding: 1rem;
-        max-height: 250px;
-    }
-    
-    .songs-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    }
+.track audio {
+  width: 100%;
+  margin-top: 6px;
 }
