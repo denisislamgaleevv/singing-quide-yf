@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YUKON FLAMES · BECK VOCAL</title>
     <style>
-        /* ===== ОБНУЛЕНИЕ И БАЗА ===== */
+        /* ===== БАЗА ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -84,7 +84,7 @@
             overflow: hidden;
         }
 
-        /* ПЛЕЕР СВЕРХУ */
+        /* ПЛЕЕР СВЕРХУ (Нативный, стилизованный) */
         .player-bar {
             background: #000;
             border-bottom: 2px solid #eaff00;
@@ -100,44 +100,37 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 0.5rem;
         }
         .player-text { color: #fff; font-size: 0.9rem; font-weight: 900; }
         .player-status { color: #eaff00; font-size: 0.7rem; }
 
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        /* Стилизация нативного аудио-плеера под наш дизайн */
+        audio {
+            width: 100%;
+            height: 40px;
+            outline: none;
+            /* Желтый фон для контролов, чтобы вписывалось в тему */
+            background-color: #eaff00; 
+            border: 2px solid #000;
+            border-radius: 0; /* Острые углы */
         }
-        
-        .player-btn {
-            background: transparent;
-            border: 2px solid #eaff00;
-            color: #eaff00;
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .player-btn-main { background: #eaff00; color: #000; }
-        .player-btn svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
-        .player-btn-secondary { border-color: #444; color: #888; }
 
-        .progress-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        /* Попытка перекрасить ползунок в Chrome/Android */
+        audio::-webkit-media-controls-panel {
+            background-color: #eaff00;
         }
-        .time-text { color: #888; font-size: 0.7rem; min-width: 35px; text-align: center; }
-        
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 8px; background: #eaff00; margin-top: -4px; }
+        audio::-webkit-media-controls-play-button,
+        audio::-webkit-media-controls-mute-button {
+            background-color: #000;
+            border-radius: 0;
+        }
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display {
+            color: #000;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+        }
 
         /* КОНТЕНТ */
         .cover-area {
@@ -218,28 +211,15 @@
     </div>
 
     <div class="main-panel">
-        <!-- ПЛЕЕР НАВЕРХУ -->
+        <!-- НАТИВНЫЙ ПЛЕЕР -->
         <div class="player-bar">
             <div class="player-info">
                 <div class="player-text" id="uiPlayerTitle">Трек не выбран</div>
-                <div class="player-status" id="uiPlayerStatus">Ожидание</div>
             </div>
-            <div class="player-controls">
-                <button class="player-btn player-btn-secondary" id="btnNext">
-                    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                </button>
-                <button class="player-btn player-btn-main" id="btnPlay">
-                    <svg viewBox="0 0 24 24" id="iconPlay"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <div class="progress-container">
-                    <span class="time-text" id="uiTimeCurrent">0:00</span>
-                    <input type="range" id="uiSlider" value="0" min="0" max="100" step="0.1">
-                    <span class="time-text" id="uiTimeDuration">0:00</span>
-                </div>
-            </div>
+            <!-- Встроенный плеер магнитолы. Он не лагает. -->
+            <audio id="mainAudio" controls preload="metadata"></audio>
         </div>
 
-        <!-- КОНТЕНТ ПОД ПЛЕЕРОМ -->
         <div class="cover-area">
             <h2 class="current-title" id="uiTitle">Выберите песню</h2>
             <div class="notes-box" id="uiNotes">
@@ -249,19 +229,13 @@
         </div>
     </div>
 
-    <audio id="mainAudio"></audio>
-
     <script>
         // ==========================================
-        // 1. КЕШИРОВАНИЕ (SERVICE WORKER)
+        // 1. КЕШИРОВАНИЕ
         // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('Кеширование включено. Сайт будет работать офлайн.', reg);
-                }).catch(err => {
-                    console.log('Ошибка кеширования:', err);
-                });
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
             });
         }
 
@@ -279,29 +253,29 @@
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Мегаполис.mp3" } ] },
             { id: "zachem", title: "Зачем", notes: "<p>▸ делать, верить — мимо.</p><p>▸ Уууээээоооо — нужно увереннее.</p><p>▸ Остальная часть не разобрана.</p>", tracks: [
                 { type: "Бек-вокал", src: "бекпартии/Зачем.mp3" },
-                { type: "Делать, верить", src: "бекпартии/Зачем - делать верить.mp3" },
-                { type: "Аэо Гизара", src: "бекпартии/Зачем - Аэо Гизара.mp3" },
+                { type: "Делать, верить", src: "бекпартии/Зачем-делать-верить.mp3" },
+                { type: "Аэо Гизара", src: "бекпартии/Зачем-Аэо-Гизара.mp3" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Зачем[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Зачем_.mp3" } ] },
             { id: "pronas", title: "Про нас", notes: "<p>▸ Припев у-у-у — пониже.</p><p>▸ Уехать с тобой в закат — мимо.</p><p>▸ В конце ааааа — вяло.</p>", tracks: [
-                { type: "Бек-вокал", src: "бекпартии/Про нас.mp3" },
+                { type: "Бек-вокал", src: "бекпартии/Про-нас.mp3" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Про Нас[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Про Нас.mp3" } ] },
             { id: "otpusk", title: "Отпуск", notes: "<p>▸ Замечаний нет.</p>", tracks: [
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Отпуск[rebalanced].mp3" },
-                { type: "С вокалом", src: "полноценные/Yukon Flames - Отпуск.mp3" } ] },
+                { type: "С вокалом", src: "полноценные/Yukon - Отпуск.mp3" } ] },
             { id: "menyanet", title: "Меня больше нет", notes: "<p>▸ Замечаний нет.</p>", tracks: [
-                { type: "Бек-вокал", src: "бекпартии/Меня больше нет.mp3" },
+                { type: "Бек-вокал", src: "бекпартии/Меня-больше-нет.mp3" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Меня больше нет[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Меня больше нет.mp3" } ] },
             { id: "student", title: "Про Ленивого Студента", notes: "<p>▸ шундый — мимо.</p><p>▸ Башка бер нэрсэ керми — лучше.</p><p>▸ Киреееек в конце — не тянуть.</p>", tracks: [
-                { type: "Бек-вокал", src: "бекпартии/Простудента.wav" }, // <-- ДОБАВЛЕННЫЙ ФАЙЛ
+                { type: "Бек-вокал", src: "бекпартии/Простудента.wav" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Песня Про Ленивого Студента[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Песня Про Ленивого Студента.mp3" } ] }
         ];
 
         // ==========================================
-        // 3. ЛОГИКА ПЛЕЕРА
+        // 3. ЛОГИКА (БЕЗ ЛАГОВ)
         // ==========================================
         let playlist = [];
         database.forEach(song => { song.tracks.forEach(track => { playlist.push({ songId: song.id, songTitle: song.title, type: track.type, src: track.src }); }); });
@@ -310,23 +284,13 @@
         const uiTitle = document.getElementById('uiTitle');
         const uiNotes = document.getElementById('uiNotes');
         const uiTracks = document.getElementById('uiTracks');
-        
         const mainAudio = document.getElementById('mainAudio');
-        const btnPlay = document.getElementById('btnPlay');
-        const iconPlay = document.getElementById('iconPlay');
-        const btnNext = document.getElementById('btnNext');
         const uiPlayerTitle = document.getElementById('uiPlayerTitle');
-        const uiPlayerStatus = document.getElementById('uiPlayerStatus');
-        const uiSlider = document.getElementById('uiSlider');
-        const uiTimeCurrent = document.getElementById('uiTimeCurrent');
-        const uiTimeDuration = document.getElementById('uiTimeDuration');
 
         let currentIndex = -1;
-        let isPlaying = false;
         let currentSongId = null;
-        const svgPlay = `<path d="M8 5v14l11-7z"/>`;
-        const svgPause = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
 
+        // Отрисовка списка (делается 1 раз)
         function initSongList() {
             database.forEach(song => {
                 const div = document.createElement('div');
@@ -338,6 +302,7 @@
             });
         }
 
+        // Клик по песне
         function selectSong(songId) {
             const song = database.find(s => s.id === songId);
             if (!song) return;
@@ -354,85 +319,77 @@
                 const btn = document.createElement('button');
                 btn.className = 'track-btn';
                 btn.textContent = track.type;
-                if (currentIndex === globalIdx && isPlaying) btn.classList.add('playing');
+                if (currentIndex === globalIdx && !mainAudio.paused) btn.classList.add('playing');
+                
+                // При клике на кнопку трека меняем src и запускаем
                 btn.onclick = () => {
-                    if (currentIndex === globalIdx && isPlaying) mainAudio.pause();
-                    else playTrack(globalIdx);
+                    document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('playing'));
+                    if (currentIndex === globalIdx && !mainAudio.paused) {
+                        mainAudio.pause();
+                    } else {
+                        btn.classList.add('playing');
+                        playTrack(globalIdx);
+                    }
                 };
                 uiTracks.appendChild(btn);
             });
 
             const firstTrackGlobalIdx = playlist.findIndex(p => p.songId === songId);
-            if (firstTrackGlobalIdx !== -1) playTrack(firstTrackGlobalIdx);
+            if (firstTrackGlobalIdx !== -1) {
+                uiTracks.children[0].classList.add('playing');
+                playTrack(firstTrackGlobalIdx);
+            }
         }
 
+        // Запуск трека
         function playTrack(globalIndex) {
             if (globalIndex < 0 || globalIndex >= playlist.length) return;
             currentIndex = globalIndex;
             const track = playlist[currentIndex];
+            
             mainAudio.src = track.src;
-            mainAudio.play().then(() => { isPlaying = true; updateUI(); }).catch(() => { uiPlayerStatus.textContent = "Ошибка"; isPlaying = false; updateUI(); });
+            mainAudio.play().catch(e => console.log("Ошибка воспроизведения"));
+            uiPlayerTitle.textContent = `${track.songTitle} — ${track.type}`;
         }
 
-        function updateUI() {
-            if (currentIndex < 0) return;
+        // АВТОПЕРЕХОД на следующий трек (когда заканчивается)
+        mainAudio.onended = () => {
+            currentIndex++;
+            if (currentIndex >= playlist.length) currentIndex = 0; // Зацикливаем весь плейлист
+            
             const track = playlist[currentIndex];
+            mainAudio.src = track.src;
+            mainAudio.play();
             uiPlayerTitle.textContent = `${track.songTitle} — ${track.type}`;
-            uiPlayerStatus.textContent = isPlaying ? "Играет" : "Пауза";
-            iconPlay.innerHTML = isPlaying ? svgPause : svgPlay;
 
+            // Подсвечиваем кнопку трека, если открыта эта песня
             if (currentSongId === track.songId) {
-                const buttons = uiTracks.querySelectorAll('.track-btn');
                 const song = database.find(s => s.id === currentSongId);
                 song.tracks.forEach((t, idx) => {
-                    const globalIdx = playlist.findIndex(p => p.src === t.src);
-                    if (buttons[idx]) buttons[idx].classList.toggle('playing', globalIdx === currentIndex && isPlaying);
+                    const btn = uiTracks.children[idx];
+                    if (btn) {
+                        const globalIdx = playlist.findIndex(p => p.src === t.src);
+                        btn.classList.toggle('playing', globalIdx === currentIndex);
+                    }
                 });
             }
-        }
-
-        btnPlay.onclick = () => {
-            if (mainAudio.paused) { mainAudio.play(); isPlaying = true; } 
-            else { mainAudio.pause(); isPlaying = false; }
-            updateUI();
         };
 
-        btnNext.onclick = () => playTrack(currentIndex + 1);
-        mainAudio.onplay = () => { isPlaying = true; updateUI(); };
-        mainAudio.onpause = () => { isPlaying = false; updateUI(); };
-        mainAudio.onended = () => playTrack(currentIndex + 1);
-
-        mainAudio.ontimeupdate = () => {
-            if (!uiSlider.matches(':active')) uiSlider.value = mainAudio.currentTime;
-            uiTimeCurrent.textContent = formatTime(mainAudio.currentTime);
-        };
-
-        mainAudio.onloadedmetadata = () => {
-            uiSlider.max = mainAudio.duration;
-            uiTimeDuration.textContent = formatTime(mainAudio.duration);
-        };
-
-        uiSlider.oninput = () => { uiTimeCurrent.textContent = formatTime(uiSlider.value); };
-        uiSlider.onchange = () => { mainAudio.currentTime = uiSlider.value; };
-
-        function formatTime(sec) {
-            if (isNaN(sec)) return "0:00";
-            const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60);
-            return `${m}:${s.toString().padStart(2, '0')}`;
-        }
-
+        // Инициализация при старте
         initSongList();
         if (database.length > 0) {
             currentSongId = database[0].id;
             document.querySelector(`.song-item[data-id="${database[0].id}"]`).classList.add('active');
             uiTitle.textContent = database[0].title;
             uiNotes.innerHTML = database[0].notes;
-            database[0].tracks.forEach(track => {
+            database[0].tracks.forEach((track, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'track-btn';
                 btn.textContent = track.type;
+                if (idx === 0) btn.classList.add('playing');
                 btn.onclick = () => {
+                    document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('playing'));
+                    btn.classList.add('playing');
                     const globalIdx = playlist.findIndex(p => p.src === track.src);
                     playTrack(globalIdx);
                 };
