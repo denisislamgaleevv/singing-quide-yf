@@ -1,7 +1,5 @@
-const CACHE_NAME = 'yukon-cache-v1';
+const CACHE_NAME = 'yukon-cache-v2'; // Поменяли версию на v2
 
-// Список всех файлов, которые нужно скачать в память.
-// Пути должны совпадать с теми, что в index.html
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -12,6 +10,7 @@ const ASSETS_TO_CACHE = [
     './бекпартии/Зачем - Аэо Гизара.mp3',
     './бекпартии/Про нас.mp3',
     './бекпартии/Меня больше нет.mp3',
+    './бекпартии/Простудента.wav', // <-- Добавили новый файл
     './инструментал/Yukon Flames - Амнезия[rebalanced].mp3',
     './инструментал/Yukon Flames - Мегаполис[rebalanced].mp3',
     './инструментал/Yukon Flames - Зачем[rebalanced].mp3',
@@ -28,17 +27,14 @@ const ASSETS_TO_CACHE = [
     './полноценные/Yukon Flames - Песня Про Ленивого Студента.mp3'
 ];
 
-// Установка - скачиваем всё в кеш
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('Скачиваем файлы в кеш...');
             return cache.addAll(ASSETS_TO_CACHE);
         })
     );
 });
 
-// Активация - удаляем старый кеш, если версия изменилась
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -53,14 +49,10 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Перехват запросов - сначала ищем в кеше, потом в интернете
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((response) => {
-            if (response) {
-                return response; // Нашли в кеше - отдаем
-            }
-            return fetch(event.request); // Нет в кеше - качаем
+            return response || fetch(event.request);
         })
     );
 });
