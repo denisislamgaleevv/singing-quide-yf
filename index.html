@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YUKON FLAMES · BECK VOCAL</title>
     <style>
-        /* ===== БАЗА ===== */
+        /* ===== ОБНУЛЕНИЕ И БАЗА ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -84,7 +84,7 @@
             overflow: hidden;
         }
 
-        /* ПЛЕЕР СВЕРХУ (Нативный, стилизованный) */
+        /* ПЛЕЕР СВЕРХУ */
         .player-bar {
             background: #000;
             border-bottom: 2px solid #eaff00;
@@ -100,37 +100,44 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
         }
         .player-text { color: #fff; font-size: 0.9rem; font-weight: 900; }
         .player-status { color: #eaff00; font-size: 0.7rem; }
 
-        /* Стилизация нативного аудио-плеера под наш дизайн */
-        audio {
-            width: 100%;
-            height: 40px;
-            outline: none;
-            /* Желтый фон для контролов, чтобы вписывалось в тему */
-            background-color: #eaff00; 
-            border: 2px solid #000;
-            border-radius: 0; /* Острые углы */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
+        
+        .player-btn {
+            background: transparent;
+            border: 2px solid #eaff00;
+            color: #eaff00;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .player-btn-main { background: #eaff00; color: #000; }
+        .player-btn svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
+        .player-btn-secondary { border-color: #444; color: #888; }
 
-        /* Попытка перекрасить ползунок в Chrome/Android */
-        audio::-webkit-media-controls-panel {
-            background-color: #eaff00;
+        .progress-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        audio::-webkit-media-controls-play-button,
-        audio::-webkit-media-controls-mute-button {
-            background-color: #000;
-            border-radius: 0;
-        }
-        audio::-webkit-media-controls-current-time-display,
-        audio::-webkit-media-controls-time-remaining-display {
-            color: #000;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-        }
+        .time-text { color: #888; font-size: 0.7rem; min-width: 35px; text-align: center; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 8px; background: #eaff00; margin-top: -4px; }
 
         /* КОНТЕНТ */
         .cover-area {
@@ -211,15 +218,28 @@
     </div>
 
     <div class="main-panel">
-        <!-- НАТИВНЫЙ ПЛЕЕР -->
+        <!-- ПЛЕЕР НАВЕРХУ -->
         <div class="player-bar">
             <div class="player-info">
                 <div class="player-text" id="uiPlayerTitle">Трек не выбран</div>
+                <div class="player-status" id="uiPlayerStatus">Ожидание</div>
             </div>
-            <!-- Встроенный плеер магнитолы. Он не лагает. -->
-            <audio id="mainAudio" controls preload="metadata"></audio>
+            <div class="player-controls">
+                <button class="player-btn player-btn-secondary" id="btnNext">
+                    <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+                <button class="player-btn player-btn-main" id="btnPlay">
+                    <svg viewBox="0 0 24 24" id="iconPlay"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <div class="progress-container">
+                    <span class="time-text" id="uiTimeCurrent">0:00</span>
+                    <input type="range" id="uiSlider" value="0" min="0" max="100" step="0.1">
+                    <span class="time-text" id="uiTimeDuration">0:00</span>
+                </div>
+            </div>
         </div>
 
+        <!-- КОНТЕНТ ПОД ПЛЕЕРОМ -->
         <div class="cover-area">
             <h2 class="current-title" id="uiTitle">Выберите песню</h2>
             <div class="notes-box" id="uiNotes">
@@ -229,18 +249,24 @@
         </div>
     </div>
 
+    <audio id="mainAudio"></audio>
+
     <script>
         // ==========================================
-        // 1. КЕШИРОВАНИЕ
+        // 1. КЕШИРОВАНИЕ (SERVICE WORKER)
         // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('Кеширование включено.', reg);
+                }).catch(err => {
+                    console.log('Ошибка кеширования:', err);
+                });
             });
         }
 
         // ==========================================
-        // 2. БАЗА ДАННЫХ
+        // 2. БАЗА ДАННЫХ (ВАШ СПИСОК)
         // ==========================================
         const database = [
             { id: "amnezia", title: "Амнезия", notes: "<p>▸ Работать над окончаниями.</p>", tracks: [
@@ -275,7 +301,7 @@
         ];
 
         // ==========================================
-        // 3. ЛОГИКА (БЕЗ ЛАГОВ)
+        // 3. ЛОГИКА ПЛЕЕРА
         // ==========================================
         let playlist = [];
         database.forEach(song => { song.tracks.forEach(track => { playlist.push({ songId: song.id, songTitle: song.title, type: track.type, src: track.src }); }); });
@@ -284,13 +310,42 @@
         const uiTitle = document.getElementById('uiTitle');
         const uiNotes = document.getElementById('uiNotes');
         const uiTracks = document.getElementById('uiTracks');
+        
         const mainAudio = document.getElementById('mainAudio');
+        const btnPlay = document.getElementById('btnPlay');
+        const iconPlay = document.getElementById('iconPlay');
+        const btnNext = document.getElementById('btnNext');
         const uiPlayerTitle = document.getElementById('uiPlayerTitle');
+        const uiPlayerStatus = document.getElementById('uiPlayerStatus');
+        const uiSlider = document.getElementById('uiSlider');
+        const uiTimeCurrent = document.getElementById('uiTimeCurrent');
+        const uiTimeDuration = document.getElementById('uiTimeDuration');
 
         let currentIndex = -1;
+        let isPlaying = false;
         let currentSongId = null;
+        const svgPlay = `<path d="M8 5v14l11-7z"/>`;
+        const svgPause = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
 
-        // Отрисовка списка (делается 1 раз)
+        // Биндим кнопки гарнитуры/руля (для старых Android)
+        window.addEventListener('keydown', (e) => {
+            // 179 = Play/Pause, 176 = Next, 177 = Prev, 178 = Stop
+            if (e.keyCode === 179) { // Play/Pause
+                e.preventDefault();
+                if (mainAudio.paused) { mainAudio.play(); isPlaying = true; } 
+                else { mainAudio.pause(); isPlaying = false; }
+                updateUI();
+            }
+            if (e.keyCode === 176) { // Next
+                e.preventDefault();
+                playTrack(currentIndex + 1);
+            }
+            if (e.keyCode === 177) { // Previous
+                e.preventDefault();
+                playTrack(currentIndex - 1);
+            }
+        });
+
         function initSongList() {
             database.forEach(song => {
                 const div = document.createElement('div');
@@ -302,7 +357,6 @@
             });
         }
 
-        // Клик по песне
         function selectSong(songId) {
             const song = database.find(s => s.id === songId);
             if (!song) return;
@@ -319,77 +373,133 @@
                 const btn = document.createElement('button');
                 btn.className = 'track-btn';
                 btn.textContent = track.type;
-                if (currentIndex === globalIdx && !mainAudio.paused) btn.classList.add('playing');
-                
-                // При клике на кнопку трека меняем src и запускаем
+                if (currentIndex === globalIdx && isPlaying) btn.classList.add('playing');
                 btn.onclick = () => {
-                    document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('playing'));
-                    if (currentIndex === globalIdx && !mainAudio.paused) {
-                        mainAudio.pause();
-                    } else {
-                        btn.classList.add('playing');
-                        playTrack(globalIdx);
-                    }
+                    if (currentIndex === globalIdx && isPlaying) mainAudio.pause();
+                    else playTrack(globalIdx);
                 };
                 uiTracks.appendChild(btn);
             });
 
             const firstTrackGlobalIdx = playlist.findIndex(p => p.songId === songId);
-            if (firstTrackGlobalIdx !== -1) {
-                uiTracks.children[0].classList.add('playing');
-                playTrack(firstTrackGlobalIdx);
-            }
+            if (firstTrackGlobalIdx !== -1) playTrack(firstTrackGlobalIdx);
         }
 
-        // Запуск трека
         function playTrack(globalIndex) {
             if (globalIndex < 0 || globalIndex >= playlist.length) return;
             currentIndex = globalIndex;
             const track = playlist[currentIndex];
-            
             mainAudio.src = track.src;
-            mainAudio.play().catch(e => console.log("Ошибка воспроизведения"));
-            uiPlayerTitle.textContent = `${track.songTitle} — ${track.type}`;
+            
+            updateMediaSession(track);
+
+            mainAudio.play().then(() => { isPlaying = true; updateUI(); }).catch(() => { uiPlayerStatus.textContent = "Ошибка"; isPlaying = false; updateUI(); });
         }
 
-        // АВТОПЕРЕХОД на следующий трек (когда заканчивается)
-        mainAudio.onended = () => {
-            currentIndex++;
-            if (currentIndex >= playlist.length) currentIndex = 0; // Зацикливаем весь плейлист
-            
-            const track = playlist[currentIndex];
-            mainAudio.src = track.src;
-            mainAudio.play();
-            uiPlayerTitle.textContent = `${track.songTitle} — ${track.type}`;
+        // ==========================================
+        // 4. УПРАВЛЕНИЕ С КНОПОК МАГНИТОЛЫ (MEDIA SESSION)
+        // ==========================================
+        function updateMediaSession(track) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.songTitle,
+                    artist: 'Yukon Flames',
+                    album: track.type,
+                    artwork: [
+                        { src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" fill="%23111"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23eaff00" font-size="60" font-family="Arial">YF</text></svg>', sizes: '512x512', type: 'image/svg+xml' }
+                    ]
+                });
 
-            // Подсвечиваем кнопку трека, если открыта эта песня
+                navigator.mediaSession.setActionHandler('play', () => {
+                    mainAudio.play();
+                    isPlaying = true;
+                    updateUI();
+                });
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    mainAudio.pause();
+                    isPlaying = false;
+                    updateUI();
+                });
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    playTrack(currentIndex - 1);
+                });
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    playTrack(currentIndex + 1);
+                });
+
+                // Перемотка (если есть кнопки на руле)
+                try {
+                    navigator.mediaSession.setActionHandler('seekbackward', () => {
+                        mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 10);
+                    });
+                    navigator.mediaSession.setActionHandler('seekforward', () => {
+                        mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 10);
+                    });
+                } catch (e) {
+                    console.log("Перемотка не поддерживается");
+                }
+            }
+        }
+
+        function updateUI() {
+            if (currentIndex < 0) return;
+            const track = playlist[currentIndex];
+            uiPlayerTitle.textContent = `${track.songTitle} — ${track.type}`;
+            uiPlayerStatus.textContent = isPlaying ? "Играет" : "Пауза";
+            iconPlay.innerHTML = isPlaying ? svgPause : svgPlay;
+
             if (currentSongId === track.songId) {
+                const buttons = uiTracks.querySelectorAll('.track-btn');
                 const song = database.find(s => s.id === currentSongId);
                 song.tracks.forEach((t, idx) => {
-                    const btn = uiTracks.children[idx];
-                    if (btn) {
-                        const globalIdx = playlist.findIndex(p => p.src === t.src);
-                        btn.classList.toggle('playing', globalIdx === currentIndex);
-                    }
+                    const globalIdx = playlist.findIndex(p => p.src === t.src);
+                    if (buttons[idx]) buttons[idx].classList.toggle('playing', globalIdx === currentIndex && isPlaying);
                 });
             }
+        }
+
+        btnPlay.onclick = () => {
+            if (mainAudio.paused) { mainAudio.play(); isPlaying = true; } 
+            else { mainAudio.pause(); isPlaying = false; }
+            updateUI();
         };
 
-        // Инициализация при старте
+        btnNext.onclick = () => playTrack(currentIndex + 1);
+        mainAudio.onplay = () => { isPlaying = true; updateUI(); };
+        mainAudio.onpause = () => { isPlaying = false; updateUI(); };
+        mainAudio.onended = () => playTrack(currentIndex + 1);
+
+        mainAudio.ontimeupdate = () => {
+            if (!uiSlider.matches(':active')) uiSlider.value = mainAudio.currentTime;
+            uiTimeCurrent.textContent = formatTime(mainAudio.currentTime);
+        };
+
+        mainAudio.onloadedmetadata = () => {
+            uiSlider.max = mainAudio.duration;
+            uiTimeDuration.textContent = formatTime(mainAudio.duration);
+        };
+
+        uiSlider.oninput = () => { uiTimeCurrent.textContent = formatTime(uiSlider.value); };
+        uiSlider.onchange = () => { mainAudio.currentTime = uiSlider.value; };
+
+        function formatTime(sec) {
+            if (isNaN(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
         initSongList();
         if (database.length > 0) {
             currentSongId = database[0].id;
             document.querySelector(`.song-item[data-id="${database[0].id}"]`).classList.add('active');
             uiTitle.textContent = database[0].title;
             uiNotes.innerHTML = database[0].notes;
-            database[0].tracks.forEach((track, idx) => {
+            database[0].tracks.forEach(track => {
                 const btn = document.createElement('button');
                 btn.className = 'track-btn';
                 btn.textContent = track.type;
-                if (idx === 0) btn.classList.add('playing');
                 btn.onclick = () => {
-                    document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('playing'));
-                    btn.classList.add('playing');
                     const globalIdx = playlist.findIndex(p => p.src === track.src);
                     playTrack(globalIdx);
                 };
