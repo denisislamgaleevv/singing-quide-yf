@@ -280,13 +280,18 @@
             { id: "zachem", title: "Зачем", notes: "<p>▸ делать, верить — мимо.</p><p>▸ Уууээээоооо — нужно увереннее.</p><p>▸ Остальная часть не разобрана.</p>", tracks: [
                 { type: "Бек-вокал", src: "бекпартии/Зачем.mp3" },
                 { type: "Делать, верить", src: "бекпартии/Зачем-делать-верить.mp3" },
+                 { type: "Делать, верить 3", src: "бекпартии/делатьверитьвысоко.mp3" },
                 { type: "Аэо Гизара", src: "бекпартии/Зачем-Аэо-Гизара.mp3" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Зачем[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Зачем_.mp3" } ] },
             { id: "pronas", title: "Про нас", notes: "<p>▸ Припев у-у-у — пониже.</p><p>▸ Уехать с тобой в закат — мимо.</p><p>▸ В конце ааааа — вяло.</p>", tracks: [
                 { type: "Бек-вокал", src: "бекпартии/Про-нас.mp3" },
+                { type: "Одной дорогой", src: "бекпартии/однойдорогой.mp3" }, 
+                { type: "Ведь все они", src: "бекпартии/ведьвсеони.mp3" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Про Нас[rebalanced].mp3" },
-                { type: "С вокалом", src: "полноценные/Yukon Flames - Про Нас.mp3" } ] },
+                { type: "С вокалом", src: "полноценные/Yukon Flames - Про Нас.mp3" }
+                 
+     ] },
             { id: "otpusk", title: "Отпуск", notes: "<p>▸ Замечаний нет.</p>", tracks: [
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Отпуск[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon - Отпуск.mp3" } ] },
@@ -295,7 +300,7 @@
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Меня больше нет[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Меня больше нет.mp3" } ] },
             { id: "student", title: "Про Ленивого Студента", notes: "<p>▸ шундый — мимо.</p><p>▸ Башка бер нэрсэ керми — лучше.</p><p>▸ Киреееек в конце — не тянуть.</p>", tracks: [
-                { type: "Бек-вокал", src: "бекпартии/Простудента.wav" },
+                { type: "Бек-вокал", src: "бекпартии/Простудента.mp3" },
                 { type: "Без вокала", src: "инструментал/Yukon Flames - Песня Про Ленивого Студента[rebalanced].mp3" },
                 { type: "С вокалом", src: "полноценные/Yukon Flames - Песня Про Ленивого Студента.mp3" } ] }
         ];
@@ -500,7 +505,7 @@
                 btn.className = 'track-btn';
                 btn.textContent = track.type;
                 btn.onclick = () => {
-                    const globalIdx = playlist.findIndex(p => p.src === track.src);
+                    const globalIdx = playlist.findIndex(p => p.src === track.src);у
                     playTrack(globalIdx);
                 };
                 uiTracks.appendChild(btn);
